@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic Analysis</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <!-- Chart.js 라이브러리 추가 -->
+</head>
+<body>
+    <div style="text-align: center;">
+        <h2>Topic Analysis</h2>
+        <canvas id="topicChart" width="400" height="200"></canvas> <!-- 차트를 그릴 canvas -->
+    </div>
+    
+    <script type="text/javascript">
+        // 더미 데이터 설정
+        const dummyData = {
+            topicAnalysisData: [
+                { topic: "Technology", frequency: 15 },
+                { topic: "Health", frequency: 10 },
+                { topic: "Finance", frequency: 20 },
+                { topic: "Education", frequency: 8 },
+                { topic: "Entertainment", frequency: 12 },
+            ]
+        };
+
+        // 차트 데이터 및 옵션
+        const data = {
+            labels: dummyData.topicAnalysisData.map(item => item.topic),
+            datasets: [{
+                label: 'Topic Frequency',
+                data: dummyData.topicAnalysisData.map(item => item.frequency),
+                backgroundColor: 'rgba(75, 192, 192, 0.6)',
+            }]
+        };
+
+        const options = {
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top'
+                },
+                title: {
+                    display: true,
+                    text: 'Topic Frequency Analysis',
+                    font: {
+                        size: 20
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Topics',
+                        font: {
+                            size: 16
+                        }
+                    }
+                },
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Frequency',
+                        font: {
+                            size: 16
+                        }
+                    }
+                }
+            }
+        };
+
+        const ctx = document.getElementById('topicChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: data,
+            options: options
+        });
+    </script>
+</body>
+</html>
