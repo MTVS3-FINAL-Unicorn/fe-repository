@@ -1,13 +1,11 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import Report from './pages/Report';
-import Dashboard from './pages/Dashboard';
+import ResultsPage from './pages/ResultsPage';
 
 const App = () => (
   <Router>
     <Routes>
-      <Route path="/" element={<Dashboard />} />
-      <Route path="/report" element={<Report />} />
+      <Route path="/" element={<ResultsPage />} />
     </Routes>
   </Router>
 );
