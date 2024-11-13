@@ -1,11 +1,43 @@
 import axios from 'axios';
 
-export const fetchReportData = async () => {
+const API_BASE_URL = 'http://localhost:319/api/v1/report';
+
+export const getQuestionsByMeetingId = async (meetingId) => {
   try {
-    const response = await axios.get('/api/report-data');
+    const response = await axios.get(`${API_BASE_URL}/get-questions/${meetingId}`);
     return response.data;
   } catch (error) {
-    console.error('Error fetching report data:', error);
-    return null;
+    console.error('Error fetching questions:', error);
+    throw error;
+  }
+};
+
+export const getReportsByMeetingId = async (meetingId) => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/${meetingId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching overall reports:', error);
+    throw error;
+  }
+};
+
+export const getReportsByQuestionId = async (questionId) => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/question/${questionId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching question-specific reports:', error);
+    throw error;
+  }
+};
+
+export const getPreferenceAnswers = async (questionId) => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/answer/preference/${questionId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching preference answers:', error);
+    throw error;
   }
 };
