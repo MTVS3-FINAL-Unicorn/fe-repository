@@ -1,0 +1,123 @@
+.page-container {
+    font-family: Arial, sans-serif;
+    color: #333;
+    width: 95%;
+    margin: 0 auto;
+}
+
+/* Header section */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    border-bottom: 2px solid #e0e0e0;
+}
+
+.company-name {
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+}
+
+.meeting-title {
+    font-size: 18px;
+    color: #666;
+}
+
+/* Tab navigation */
+nav {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+    padding: 20px;
+    border-bottom: 2px solid #e0e0e0;
+    overflow-x: auto;
+    /* 넘칠 때 가로 스크롤 가능 */
+    white-space: nowrap;
+    /* 버튼이 한 줄로 정렬되도록 설정 */
+    width: 100vw;
+    /* 화면 전체 너비에 고정 */
+    box-sizing: border-box;
+    /* 패딩이 포함된 너비로 설정 */
+    max-width: 100%;
+    /* 최대 너비 제한 */
+}
+
+nav::-webkit-scrollbar {
+    height: 6px;
+    /* 스크롤바 높이 */
+}
+
+nav::-webkit-scrollbar-thumb {
+    background-color: #ccc;
+    /* 스크롤바 색상 */
+    border-radius: 10px;
+}
+
+nav::-webkit-scrollbar-track {
+    background: #f0f0f0;
+}
+
+/* 탭 버튼 스타일 */
+nav button {
+    background-color: #b1afb8;
+    border: 1px solid #d0d0d0;
+    border-radius: 5px;
+    padding: 10px 15px;
+    cursor: pointer;
+    font-size: 14px;
+    color: #333;
+    transition: background-color 0.2s, color 0.2s;
+    flex-shrink: 0;
+    /* 버튼이 줄어들지 않도록 설정 */
+}
+
+nav button:hover {
+    background-color: #a185f0;
+    color: #fff;
+}
+
+nav button:active,
+nav button:focus {
+    background-color: #333;
+    color: #fff;
+    outline: none;
+}
+
+/* 선택된 탭 버튼 */
+nav button.selected {
+    background-color: #a185f0;
+    color: #fff;
+}
+
+.preference-chart {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.chart-container {
+    width: 100%;
+    /* Make it responsive */
+    max-width: 500px;
+    /* Limit chart width */
+    margin: 0 auto;
+    padding: 10px 0;
+    /* Space around the chart */
+}
+
+.preference-chart h2 {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 15px;
+}
+
+.preference-chart p {
+    font-size: 16px;
+    color: #555;
+    margin-top: 15px;
+}
