@@ -1,84 +1,117 @@
-import React from 'react';
-import { Bubble } from 'react-chartjs-2';
+import React from "react";
+import { Bubble, Bar } from "react-chartjs-2";
 import {
   Chart as ChartJS,
   LinearScale,
   PointElement,
+  BarElement,
   Tooltip,
   Legend,
-} from 'chart.js';
+  CategoryScale,
+} from "chart.js";
 
-ChartJS.register(LinearScale, PointElement, Tooltip, Legend);
+ChartJS.register(LinearScale, PointElement, BarElement, Tooltip, Legend, CategoryScale);
 
 const SentimentAnalysis = ({ sentimentData }) => {
   if (!sentimentData || Object.keys(sentimentData).length === 0) {
     return <p>데이터를 불러오는 중 오류가 발생했습니다.</p>;
   }
 
-  // Sort terms by frequency and take the top 10 for legend and highlight purposes
-  const sortedTerms = Object.entries(sentimentData)
-    .sort(([, a], [, b]) => b.freq - a.freq)
-    .slice(0, 10);
+  // 긍정 점수가 높은 6개, 부정 점수가 낮은 6개 단어
+  const sortedBySentiment = Object.entries(sentimentData).sort(
+    ([, a], [, b]) => b.sentiment_score - a.sentiment_score
+  );
+  const mostPositiveTerms = sortedBySentiment.slice(0, 6);
+  const mostNegativeTerms = sortedBySentiment.slice(-6).reverse();
+  const topLegendTerms = new Set([...mostPositiveTerms, ...mostNegativeTerms].map(([term]) => term));
 
-  const topTerms = new Set(sortedTerms.map(([term]) => term));
+  // 긍정 단어와 부정 단어로 범례 구성
+  const positiveTerms = mostPositiveTerms.map(([term]) => term).join(", ");
+  const negativeTerms = mostNegativeTerms.map(([term]) => term).join(", ");
 
+  // 버블 차트 데이터
   const sentimentBubbleData = {
     datasets: Object.keys(sentimentData).map((term, index) => ({
-      label: topTerms.has(term) ? term : '', // Only show labels for top 10 terms
+      label: term, // 단어 자체를 툴팁과 범례에서 사용
       data: [
         {
           x: sentimentData[term].freq,
           y: sentimentData[term].sentiment_score,
-          r: Math.sqrt(sentimentData[term].freq) * 5,
+          r: Math.sqrt(sentimentData[term].freq) * 4, // 크기 조정
         },
       ],
-      backgroundColor: topTerms.has(term)
-        ? `rgba(${index * 25 % 255}, ${150 + index * 10 % 100}, ${200 - index * 15 % 150}, 0.7)`
-        : 'rgba(200, 200, 200, 0.4)', // gray for non-top terms
-      borderColor: 'rgba(0, 0, 0, 0.1)',
+      backgroundColor: `rgba(${index * 25 % 255}, ${150 + index * 10 % 100}, ${
+        200 - index * 15 % 150
+      }, 0.7)`,
+      borderColor: "rgba(0, 0, 0, 0.2)",
       borderWidth: 1,
-      hoverBorderColor: topTerms.has(term) ? 'rgba(0, 0, 0, 0.5)' : 'rgba(0, 0, 0, 0.2)',
-      hoverBorderWidth: topTerms.has(term) ? 2 : 1,
     })),
   };
 
-  const mostPositiveTerm = Object.entries(sentimentData).reduce(
-    (max, [term, data]) =>
-      data.sentiment_score > max.sentiment_score ? { term, ...data } : max,
-    { term: '', sentiment_score: -1 }
-  );
+  // 막대 차트 데이터
+  const sortedTerms = Object.entries(sentimentData)
+    .sort(([, a], [, b]) => b.freq - a.freq)
+    .slice(0, 10);
+  const barChartData = {
+    labels: sortedTerms.map(([term]) => term),
+    datasets: [
+      {
+        label: "단어 빈도",
+        data: sortedTerms.map(([, data]) => data.freq),
+        backgroundColor: sortedTerms.map(
+          (_, index) =>
+            `rgba(${index * 25 % 255}, ${150 + index * 10 % 100}, ${200 - index * 15 % 150}, 0.7)`
+        ),
+        borderColor: "rgba(0, 0, 0, 0.1)",
+        borderWidth: 1,
+      },
+    ],
+  };
 
-  const mostNegativeTerm = Object.entries(sentimentData).reduce(
-    (min, [term, data]) =>
-      data.sentiment_score < min.sentiment_score ? { term, ...data } : min,
-    { term: '', sentiment_score: 1 }
+  // 감정 점수 분포 히스토그램 데이터
+  const sentimentScores = Object.values(sentimentData).map((data) => data.sentiment_score);
+  const bins = Array.from({ length: 10 }, (_, i) => i * 0.1);
+  const histogramData = bins.map(
+    (bin, i) => sentimentScores.filter((score) => score >= bin && score < bin + 0.1).length
   );
+  const histogramChartData = {
+    labels: bins.map((bin) => `${bin.toFixed(1)}-${(bin + 0.1).toFixed(1)}`),
+    datasets: [
+      {
+        label: "감정 점수 분포",
+        data: histogramData,
+        backgroundColor: bins.map(
+          (_, index) =>
+            `rgba(${index * 25 % 255}, ${150 + index * 10 % 100}, ${200 - index * 15 % 150}, 0.7)`
+        ),
+        borderColor: "rgba(0, 0, 0, 0.1)",
+        borderWidth: 1,
+      },
+    ],
+  };
 
-  const options = {
+  const bubbleOptions = {
     scales: {
-      x: {
-        title: { display: true, text: '빈도 (Frequency)' },
-        beginAtZero: true,
-      },
-      y: {
-        title: { display: true, text: '감정 점수 (Sentiment Score)' },
-        min: 0,
-        max: 1,
-      },
+      x: { title: { display: true, text: "단어 빈도 (Frequency)" } },
+      y: { title: { display: true, text: "감정 점수 (Sentiment Score)" }, min: 0, max: 1 },
     },
     plugins: {
       legend: {
         display: true,
+        position: "bottom", // 범례를 차트 아래로 이동
         labels: {
-          filter: (legendItem) => topTerms.has(legendItem.text), // Only show legend for top 10 terms
+          generateLabels: () => [
+            { text: `긍정 점수가 높은 단어(상위 6개): ${positiveTerms}`, fillStyle: "rgba(0, 200, 0, 0.6)" },
+            { text: `부정 점수가 높은 단어(상위 6개): ${negativeTerms}`, fillStyle: "rgba(200, 0, 0, 0.6)" },
+          ],
         },
       },
       tooltip: {
         callbacks: {
           label: (context) => {
-            const label = context.dataset.label || '';
-            const { x, y } = context.raw;
-            return `${label}: 빈도 ${x}, 감정 점수 ${y.toFixed(2)}`;
+            const label = context.dataset.label || "";
+            const { x, y, r } = context.raw;
+            return `${label}: 빈도 ${x}, 감정 점수 ${y.toFixed(2)}, 크기 ${r.toFixed(2)}`;
           },
         },
       },
@@ -88,44 +121,79 @@ const SentimentAnalysis = ({ sentimentData }) => {
   return (
     <section style={styles.container}>
       <h2 style={styles.title}>감정 분석</h2>
-      <div style={styles.chartContainer}>
-        <Bubble data={sentimentBubbleData} options={options} />
+      <p style={styles.explanation}>
+            * 0에 가까울수록 부정적인 반응이, 1에 가까울수록 긍정적인 반응이 강합니다.
+      </p>
+      <div style={styles.bubbleChart}>
+        <p style={styles.chartDescription}>감정 점수와 단어 빈도를 나타낸 버블 차트</p>
+        <Bubble data={sentimentBubbleData} options={bubbleOptions} />
       </div>
-      <p style={styles.description}>감정 점수와 빈도에 따라 단어가 시각화된 버블 차트입니다.</p>
-      <p style={styles.highlight}>
-        <strong>가장 긍정적으로 반응한 단어:</strong> {mostPositiveTerm.term} (감정 점수: {mostPositiveTerm.sentiment_score.toFixed(2)})
-      </p>
-      <p style={styles.highlight}>
-        <strong>가장 부정적으로 반응한 단어:</strong> {mostNegativeTerm.term} (감정 점수: {mostNegativeTerm.sentiment_score.toFixed(2)})
-      </p>
+      <div style={styles.barCharts}>
+        <div style={styles.chartContainer}>
+          <p style={styles.chartDescription}>가장 언급량이 많은 단어 상위 10개</p>
+          <Bar data={barChartData} options={styles.barOptions} />
+        </div>
+        <div style={styles.chartContainer}>
+          <p style={styles.chartDescription}>전반적인 감정 점수 분포<br/>
+            <Bar data={histogramChartData} options={styles.histogramOptions} /></p>
+        </div>
+      </div>
     </section>
   );
 };
 
 const styles = {
   container: {
-    textAlign: 'center',
-    padding: '20px',
+    textAlign: "center",
+    padding: "20px",
   },
   title: {
-    fontSize: '24px',
-    fontWeight: 'bold',
-    marginBottom: '10px',
+    fontSize: "26px",
+    fontWeight: "bold",
+    marginBottom: "20px",
+  },
+  bubbleChart: {
+    width: "60%",
+    height: "400px", // 높이도 조정
+    margin: "0 auto",
+  },
+  barCharts: {
+    display: "flex",
+    justifyContent: "center",
+    gap: "20px",
+    marginTop: "30px",
   },
   chartContainer: {
-    maxWidth: '800px',
-    height: '450px', // Increased chart height
-    margin: '0 auto',
+    width: "45%",
   },
-  description: {
-    fontSize: '16px',
-    color: '#555',
-    marginTop: '20px',
+  barOptions: {
+    indexAxis: "y",
+    plugins: {
+      legend: { display: false },
+    },
+    scales: {
+      x: { title: { display: true, text: "빈도" } },
+      y: { title: { display: true, text: "단어" } },
+    },
   },
-  highlight: {
-    fontSize: '18px',
-    color: '#333',
-    marginTop: '10px',
+  histogramOptions: {
+    plugins: {
+      legend: { display: false },
+    },
+    scales: {
+      x: { title: { display: true, text: "감정 점수 구간" } },
+      y: { title: { display: true, text: "빈도" } },
+    },
+  },
+  chartDescription: {
+    fontSize: "20px",
+    color: "#555",
+    marginTop: "10px",
+  },
+  explanation: {
+    fontSize: "14px",
+    color: "#555",
+    marginTop: "10px",
   },
 };
 
