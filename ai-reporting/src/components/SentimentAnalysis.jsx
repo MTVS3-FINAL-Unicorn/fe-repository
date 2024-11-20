@@ -134,8 +134,8 @@ const SentimentAnalysis = ({ sentimentData }) => {
           <Bar data={barChartData} options={styles.barOptions} />
         </div>
         <div style={styles.chartContainer}>
-          <p style={styles.chartDescription}>전반적인 감정 점수 분포<br/>
-            <Bar data={histogramChartData} options={styles.histogramOptions} /></p>
+          <p style={styles.chartDescription}>전반적인 감정 점수 분포</p>
+          <Bar data={histogramChartData} options={styles.histogramOptions} />
         </div>
       </div>
     </section>
@@ -154,7 +154,7 @@ const styles = {
     marginBottom: "20px",
   },
   bubbleChart: {
-    width: "60%",
+    justifyItems: "center",
     height: "400px", // 높이도 조정
     margin: "0 auto",
   },
@@ -162,7 +162,7 @@ const styles = {
     display: "flex",
     justifyContent: "center",
     gap: "20px",
-    marginTop: "30px",
+    marginTop: "80px",
   },
   chartContainer: {
     width: "45%",
