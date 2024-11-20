@@ -50,13 +50,13 @@ const ResultsPage = ({ meetingId = 1 }) => {
             className={`nav-item ${selectedTab === 'Overall' ? 'active' : ''}`}
             onClick={() => setSelectedTab('Overall')}
           >
-            전체 요약
+            전체 분석
           </div>
           <div
             className={`nav-item ${selectedTab === 'Detailed' ? 'active' : ''}`}
             onClick={() => setSelectedTab('Detailed')}
           >
-            상세 내용 보기
+            스크립트 분석
           </div>
         </nav>
       </header>
