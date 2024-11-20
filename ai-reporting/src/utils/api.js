@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:319/api/v1/report';
+const API_BASE_URL = 'http://125.132.216.190:319/api/v1/report';
 
 export const getQuestionsByMeetingId = async (meetingId) => {
   try {
