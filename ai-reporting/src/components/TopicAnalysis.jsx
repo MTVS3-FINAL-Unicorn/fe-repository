@@ -1,100 +1,192 @@
-import React from 'react';
-import { Bar } from 'react-chartjs-2';
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Tooltip,
-  Legend,
-} from 'chart.js';
+import React, { useEffect, useRef, useState } from "react";
+import * as d3 from "d3";
 
-ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
+const TopicAnalysis = ({ data }) => {
+  const [selectedTopic, setSelectedTopic] = useState(0); // 기본 선택 토픽
+  const [lambda, setLambda] = useState(1); // 관련성 조정 슬라이더 값
+  const svgRef = useRef();
+  const barChartRef = useRef();
 
-const TopicAnalysis = ({ topicData }) => {
-  if (!topicData || !topicData.tinfo || !topicData.mdsDat) {
-    return <p>데이터를 불러오는 중 오류가 발생했습니다.</p>;
-  }
+  // 사용자 정의 폰트 적용
+  useEffect(() => {
+    const fontStyle = document.createElement("style");
+    fontStyle.innerHTML = `
+      @font-face {
+        font-family: 'Paperlogy';
+        src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/2408-3@1.0/Paperlogy-4Regular.woff2') format('woff2');
+        font-weight: 400;
+        font-style: normal;
+      }
+      body {
+        font-family: 'Paperlogy', sans-serif;
+      }
+    `;
+    document.head.appendChild(fontStyle);
+  }, []);
 
-  const topicBarData = {
-    labels: topicData.tinfo.Term.slice(0, 10),
-    datasets: [
-      {
-        label: '빈도',
-        data: topicData.tinfo.Freq.slice(0, 10),
-        backgroundColor: 'rgba(75, 192, 192, 0.6)',
-        borderColor: 'rgba(75, 192, 192, 1)',
-        borderWidth: 1,
-      },
-    ],
+  const getTopicSummary = (topicIndex) => {
+    const terms = data.tinfo.Term.filter((_, i) => data.tinfo.Category[i] === `Topic${topicIndex + 1}`);
+    const frequencies = terms.map((term, i) => ({
+      term,
+      freq: data.tinfo.Freq[i],
+    }));
+
+    const sortedTerms = frequencies.sort((a, b) => b.freq - a.freq).slice(0, 5); // 상위 5개 단어
+    return sortedTerms.map((t) => t.term).join(", "); // 단어를 ","로 연결
   };
 
-  const options = {
-    responsive: true,
-    maintainAspectRatio: false, // Allow chart to stretch vertically
-    scales: {
-      y: {
-        beginAtZero: true,
-        ticks: {
-          stepSize: 1,
-        },
-      },
-    },
-  };
+  useEffect(() => {
+    if (!data.mdsDat || !data.tinfo) {
+      console.error("유효하지 않은 데이터입니다.");
+      return;
+    }
 
-  // Find the label of the most frequent topic
-  const mostFrequentTopicIndex = topicData.mdsDat.Freq.indexOf(Math.max(...topicData.mdsDat.Freq));
-  const mostFrequentTopic = {
-    label: topicData.tinfo.Term[mostFrequentTopicIndex],
-    frequency: topicData.mdsDat.Freq[mostFrequentTopicIndex],
-  };
+    const { mdsDat } = data;
+    const svg = d3.select(svgRef.current);
+    svg.selectAll("*").remove(); // 기존 내용 초기화
+
+    const width = 400;
+    const height = 400;
+    const margin = 20;
+
+    const xScale = d3
+      .scaleLinear()
+      .domain([d3.min(mdsDat.x) - 0.2, d3.max(mdsDat.x) + 0.2])
+      .range([margin, width - margin]);
+    const yScale = d3
+      .scaleLinear()
+      .domain([d3.min(mdsDat.y) - 0.2, d3.max(mdsDat.y) + 0.2])
+      .range([height - margin, margin]);
+
+    const colorScale = d3.scaleLinear()
+      .domain([0, d3.max(mdsDat.Freq)])
+      .range(["#A5D8FF", "#B2F2BB"]);
+
+    const rScale = d3.scaleLinear()
+      .domain([0, d3.max(mdsDat.Freq)])
+      .range([15, 52.5]);
+
+    svg
+      .selectAll("circle")
+      .data(mdsDat.topics)
+      .enter()
+      .append("circle")
+      .attr("cx", (_, i) => xScale(mdsDat.x[i]))
+      .attr("cy", (_, i) => yScale(mdsDat.y[i]))
+      .attr("r", (_, i) => rScale(mdsDat.Freq[i]))
+      .attr("fill", (_, i) => (i === selectedTopic ? "#4CAF50" : colorScale(mdsDat.Freq[i])))
+      .attr("opacity", (_, i) => (i === selectedTopic ? 1 : 0.7))
+      .attr("stroke", "black")
+      .attr("stroke-width", 1)
+      .on("click", (_, i) => setSelectedTopic(i));
+
+    svg
+      .selectAll("text")
+      .data(mdsDat.topics)
+      .enter()
+      .append("text")
+      .attr("x", (_, i) => xScale(mdsDat.x[i]))
+      .attr("y", (_, i) => yScale(mdsDat.y[i]) - rScale(mdsDat.Freq[i]) - 5)
+      .attr("text-anchor", "middle")
+      .style("font-size", "12px")
+      .style("font-family", "Paperlogy")
+      .text((_, i) => `토픽 ${mdsDat.topics[i]} (${mdsDat.Freq[i].toFixed(1)}%)`);
+  }, [data, selectedTopic]);
+
+  useEffect(() => {
+    if (!data.tinfo) {
+      console.error("유효하지 않은 데이터입니다.");
+      return;
+    }
+
+    const terms = data.tinfo.Term.filter((_, i) => data.tinfo.Category[i] === `Topic${selectedTopic + 1}`);
+    const frequencies = terms.map((term, i) => ({
+      term,
+      freq: data.tinfo.Freq[i] * lambda,
+    }));
+
+    frequencies.sort((a, b) => b.freq - a.freq);
+    const topTerms = frequencies.slice(0, 10);
+
+    const barChart = d3.select(barChartRef.current);
+    barChart.selectAll("*").remove();
+
+    const width = 400;
+    const height = 360;
+    const margin = { top: 20, right: 20, bottom: 40, left: 120 };
+
+    const xScale = d3.scaleLinear().domain([0, d3.max(topTerms, (d) => d.freq)]).range([0, width - margin.left - margin.right]);
+    const yScale = d3.scaleBand().domain(topTerms.map((d) => d.term)).range([0, height - margin.top - margin.bottom]).padding(0.1);
+
+    const g = barChart.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
+
+    g.selectAll("rect")
+      .data(topTerms)
+      .enter()
+      .append("rect")
+      .attr("x", 0)
+      .attr("y", (d) => yScale(d.term))
+      .attr("width", (d) => xScale(d.freq))
+      .attr("height", yScale.bandwidth())
+      .attr("fill", "#A5D8FF");
+
+    g.selectAll("text")
+      .data(topTerms)
+      .enter()
+      .append("text")
+      .attr("x", (d) => xScale(d.freq) + 5)
+      .attr("y", (d) => yScale(d.term) + yScale.bandwidth() / 2)
+      .attr("dy", "0.35em")
+      .style("font-size", "12px")
+      .style("font-family", "Paperlogy")
+      .text((d) => d.freq.toFixed(2));
+
+    g.append("g").call(d3.axisLeft(yScale).tickSize(0).tickPadding(10).tickSizeOuter(0));
+    g.append("g").attr("transform", `translate(0,${height - margin.top - margin.bottom})`).call(d3.axisBottom(xScale).ticks(5));
+  }, [data, selectedTopic, lambda]);
 
   return (
-    <section style={styles.container}>
-      <h2 style={styles.title}>토픽 분석</h2>
-      <div style={styles.chartContainer}>
-        <Bar data={topicBarData} options={options} />
-      </div>
-      <p style={styles.description}>주요 토픽과 그 빈도를 시각화한 차트입니다.</p>
-      <p style={styles.highlight}>
-        <strong>가장 빈도가 높은 주제:</strong> {mostFrequentTopic.label} (빈도: {mostFrequentTopic.frequency.toFixed(2)}%)
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", margin: "20px" }}>
+      <h2 style={{ fontFamily: "Paperlogy" }}>토픽 분석</h2>
+      <p style={{ fontFamily: "Paperlogy" }}>
+        토픽 분석은 데이터에서 주요 주제를 추출하고 이를 시각적으로 표현하는 과정입니다.
+        아래 차트는 토픽 간의 관계와 각 토픽 내 주요 단어를 보여줍니다.
       </p>
-    </section>
+      <div style={{ display: "flex", justifyContent: "center", gap: "40px" }}>
+        <div style={{ textAlign: "center" }}>
+          <svg ref={svgRef} width={400} height={360}></svg>
+          <p style={{ fontFamily: "Paperlogy", marginTop: "10px" }}>
+            이 차트는 토픽 간의 거리와 크기를 시각적으로 표현한 것입니다.<br/>
+            각 원의 크기는 빈도를 나타냅니다.
+          </p>
+        </div>
+        <div style={{ textAlign: "center" }}>
+          <svg ref={barChartRef} width={450} height={360}></svg>
+          <p style={{ fontFamily: "Paperlogy", marginTop: "10px" }}>
+            이 차트는 선택된 토픽에서 가장 많이 언급된 단어와 빈도를 나타냅니다.
+          </p>
+        </div>
+      </div>
+      <div style={{ marginTop: "20px", textAlign: "center" }}>
+        <label style={{ fontFamily: "Paperlogy" }}>선택된 토픽: {selectedTopic + 1}</label>
+        <button onClick={() => setSelectedTopic((prev) => Math.max(prev - 1, 0))}>이전 토픽</button>
+        <button onClick={() => setSelectedTopic((prev) => Math.min(prev + 1, data.mdsDat.topics.length - 1))}>다음 토픽</button>
+        <input
+          type="range"
+          min={0}
+          max={1}
+          step={0.1}
+          value={lambda}
+          onChange={(e) => setLambda(Number(e.target.value))}
+        />
+        <span> 관련성 척도 = {lambda.toFixed(1)}</span>
+      </div>
+      <div style={{ marginTop: "40px", textAlign: "center" }}>
+        <h3 style={{ fontFamily: "Paperlogy", marginBottom: "10px" }}>토픽별 가장 많이 언급된 단어</h3>
+        <p style={{ fontFamily: "Paperlogy" }}>토픽 {selectedTopic + 1}: {getTopicSummary(selectedTopic)}</p>
+      </div>
+    </div>
   );
-};
-
-const styles = {
-  container: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    textAlign: 'center',
-    padding: '20px',
-  },
-  title: {
-    fontSize: '24px',
-    fontWeight: 'bold',
-    marginBottom: '10px',
-  },
-  chartContainer: {
-    width: '800px',
-    height: '400px',
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: '20px',
-  },
-  description: {
-    fontSize: '16px',
-    color: '#555',
-    marginTop: '20px',
-  },
-  highlight: {
-    fontSize: '18px',
-    color: '#333',
-    marginTop: '10px',
-  },
 };
 
 export default TopicAnalysis;
