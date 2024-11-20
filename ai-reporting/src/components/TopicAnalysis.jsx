@@ -110,11 +110,12 @@ const TopicAnalysis = ({ data }) => {
         .style("top", `${event.pageY - 30}px`);
     })
     .on("mouseout", function () {
-      tooltip
-        .style("opacity", 0)
-        .style("left", `-9999px`) // 화면 밖으로 이동
-        .style("top", `-9999px`); // 화면 밖으로 이동
+      tooltip.style("opacity", 0).style("left", `-9999px`).style("top", `-9999px`);
       d3.select(this).attr("stroke", "black").attr("stroke-width", 1); // 원래 상태로 복구
+    })
+    .on("click", function (event, d) {
+      const topicIndex = mdsDat.topics.indexOf(d); // 클릭된 데이터의 인덱스
+      setSelectedTopic(topicIndex); // 선택된 토픽 업데이트
     });
 
   svg
@@ -215,14 +216,48 @@ const TopicAnalysis = ({ data }) => {
         </div>
       </div>
       <div style={{ marginTop: "40px", textAlign: "center" }}>
-        <h3 style={{ fontFamily: "Paperlogy", marginBottom: "10px" }}>토픽별 가장 많이 언급된 단어</h3>
-        <p style={{ fontFamily: "Paperlogy" }}>토픽 {selectedTopic + 1}: {getTopicSummary(selectedTopic)}</p>
+      <div style={{ display: "inline-flex", alignItems: "center", gap: "10px", justifyContent: "center", marginBottom: "20px" }}>
+        <p style={{ fontFamily: "Paperlogy", fontSize: "14px", fontWeight: "bold", margin: "0" }}>
+          토픽별 가장 많이 언급된 단어 |
+        </p>
+        <p style={{ fontFamily: "Paperlogy", fontSize: "18px", color: "#333", margin: "0" }}>
+          토픽 {selectedTopic + 1}: {getTopicSummary(selectedTopic)}
+        </p>
       </div>
-      <div style={{ marginTop: "20px", textAlign: "center" }}>
-        <label style={{ fontFamily: "Paperlogy" }}>선택된 토픽: {selectedTopic + 1}</label>
-        <button onClick={() => setSelectedTopic((prev) => Math.max(prev - 1, 0))}>이전 토픽</button>
-        <button onClick={() => setSelectedTopic((prev) => Math.min(prev + 1, data.mdsDat.topics.length - 1))}>다음 토픽</button>
+      <div style={{ display: "flex", justifyContent: "center", gap: "10px", alignItems: "center" }}>
+        <label style={{ fontFamily: "Paperlogy", fontSize: "18px", color: "#555" }}>
+          선택된 토픽: {selectedTopic + 1}
+        </label>
+        <button
+          onClick={() => setSelectedTopic((prev) => Math.max(prev - 1, 0))}
+          style={{
+            padding: "8px 12px",
+            fontFamily: "Paperlogy",
+            fontSize: "14px",
+            backgroundColor: "#A5D8FF",
+            border: "none",
+            borderRadius: "5px",
+            cursor: "pointer",
+          }}
+        >
+          이전 토픽
+        </button>
+        <button
+          onClick={() => setSelectedTopic((prev) => Math.min(prev + 1, data.mdsDat.topics.length - 1))}
+          style={{
+            padding: "8px 12px",
+            fontFamily: "Paperlogy",
+            fontSize: "14px",
+            backgroundColor: "#A5D8FF",
+            border: "none",
+            borderRadius: "5px",
+            cursor: "pointer",
+          }}
+        >
+          다음 토픽
+        </button>
       </div>
+    </div>
     </div>
   );
 };
