@@ -147,25 +147,29 @@ const TopicAnalysis = ({ data }) => {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", margin: "20px" }}>
-      <h2 style={{ fontFamily: "Paperlogy" }}>토픽 분석</h2>
-      <p style={{ fontFamily: "Paperlogy" }}>
+      <h2 style={{ fontFamily: "Paperlogy", marginBottom: "5px" }}>토픽 분석</h2> {/* 간격 조정 */}
+      <p style={{ fontFamily: "Paperlogy", marginTop: "0px" }}> {/* 간격 조정 */}
         토픽 분석은 데이터에서 주요 주제를 추출하고 이를 시각적으로 표현하는 과정입니다.
         아래 차트는 토픽 간의 관계와 각 토픽 내 주요 단어를 보여줍니다.
       </p>
       <div style={{ display: "flex", justifyContent: "center", gap: "40px" }}>
         <div style={{ textAlign: "center" }}>
           <svg ref={svgRef} width={400} height={360}></svg>
-          <p style={{ fontFamily: "Paperlogy", marginTop: "10px" }}>
+          <p style={{ fontFamily: "Paperlogy", fontSize: "14px", marginTop: "10px" }}>
             이 차트는 토픽 간의 거리와 크기를 시각적으로 표현한 것입니다.<br/>
             각 원의 크기는 빈도를 나타냅니다.
           </p>
         </div>
         <div style={{ textAlign: "center" }}>
           <svg ref={barChartRef} width={450} height={360}></svg>
-          <p style={{ fontFamily: "Paperlogy", marginTop: "10px" }}>
+          <p style={{ fontFamily: "Paperlogy", fontSize: "14px", marginTop: "10px" }}>
             이 차트는 선택된 토픽에서 가장 많이 언급된 단어와 빈도를 나타냅니다.
           </p>
         </div>
+      </div>
+      <div style={{ marginTop: "40px", textAlign: "center" }}>
+        <h3 style={{ fontFamily: "Paperlogy", marginBottom: "10px" }}>토픽별 가장 많이 언급된 단어</h3>
+        <p style={{ fontFamily: "Paperlogy" }}>토픽 {selectedTopic + 1}: {getTopicSummary(selectedTopic)}</p>
       </div>
       <div style={{ marginTop: "20px", textAlign: "center" }}>
         <label style={{ fontFamily: "Paperlogy" }}>선택된 토픽: {selectedTopic + 1}</label>
@@ -180,10 +184,6 @@ const TopicAnalysis = ({ data }) => {
           onChange={(e) => setLambda(Number(e.target.value))}
         />
         <span> 관련성 척도 = {lambda.toFixed(1)}</span>
-      </div>
-      <div style={{ marginTop: "40px", textAlign: "center" }}>
-        <h3 style={{ fontFamily: "Paperlogy", marginBottom: "10px" }}>토픽별 가장 많이 언급된 단어</h3>
-        <p style={{ fontFamily: "Paperlogy" }}>토픽 {selectedTopic + 1}: {getTopicSummary(selectedTopic)}</p>
       </div>
     </div>
   );

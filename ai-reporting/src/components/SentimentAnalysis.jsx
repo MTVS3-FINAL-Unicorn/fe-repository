@@ -120,11 +120,11 @@ const SentimentAnalysis = ({ sentimentData }) => {
 
   return (
     <section style={styles.container}>
-      <h2 style={styles.title}>감정 분석</h2>
-      <p style={styles.explanation}>
+      <h2 style={{ ...styles.title, marginBottom: "10px" }}>감정 분석</h2> {/* 간격 줄임 */}
+      <p style={{ ...styles.explanation, marginBottom: "30px" }}>
             * 0에 가까울수록 부정적인 반응이, 1에 가까울수록 긍정적인 반응이 강합니다.
       </p>
-      <div style={styles.bubbleChart}>
+      <div style={{ ...styles.bubbleChart, marginTop: "40px" }}>
         <p style={styles.chartDescription}>감정 점수와 단어 빈도를 나타낸 버블 차트</p>
         <Bubble data={sentimentBubbleData} options={bubbleOptions} />
       </div>
@@ -146,6 +146,7 @@ const styles = {
   container: {
     textAlign: "center",
     padding: "20px",
+    marginBottom: "40px",
   },
   title: {
     fontSize: "26px",
