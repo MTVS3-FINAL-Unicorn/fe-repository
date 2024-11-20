@@ -36,62 +36,100 @@ const TopicAnalysis = ({ data }) => {
   };
 
   useEffect(() => {
-    if (!data.mdsDat || !data.tinfo) {
-      console.error("유효하지 않은 데이터입니다.");
-      return;
-    }
+  if (!data.mdsDat || !data.tinfo) {
+    console.error("유효하지 않은 데이터입니다.");
+    return;
+  }
 
-    const { mdsDat } = data;
-    const svg = d3.select(svgRef.current);
-    svg.selectAll("*").remove(); // 기존 내용 초기화
+  const { mdsDat } = data;
+  const svg = d3.select(svgRef.current);
+  svg.selectAll("*").remove(); // 기존 내용 초기화
 
-    const width = 400;
-    const height = 400;
-    const margin = 20;
+  const width = 400;
+  const height = 400;
+  const margin = 20;
 
-    const xScale = d3
-      .scaleLinear()
-      .domain([d3.min(mdsDat.x) - 0.2, d3.max(mdsDat.x) + 0.2])
-      .range([margin, width - margin]);
-    const yScale = d3
-      .scaleLinear()
-      .domain([d3.min(mdsDat.y) - 0.2, d3.max(mdsDat.y) + 0.2])
-      .range([height - margin, margin]);
+  const xScale = d3
+    .scaleLinear()
+    .domain([d3.min(mdsDat.x) - 0.2, d3.max(mdsDat.x) + 0.2])
+    .range([margin, width - margin]);
+  const yScale = d3
+    .scaleLinear()
+    .domain([d3.min(mdsDat.y) - 0.2, d3.max(mdsDat.y) + 0.2])
+    .range([height - margin, margin]);
 
-    const colorScale = d3.scaleLinear()
-      .domain([0, d3.max(mdsDat.Freq)])
-      .range(["#A5D8FF", "#B2F2BB"]);
+  const colorScale = d3.scaleLinear()
+    .domain([0, d3.max(mdsDat.Freq)])
+    .range(["#A5D8FF", "#B2F2BB"]);
 
-    const rScale = d3.scaleLinear()
-      .domain([0, d3.max(mdsDat.Freq)])
-      .range([15, 52.5]);
+  const rScale = d3.scaleLinear()
+    .domain([0, d3.max(mdsDat.Freq)])
+    .range([15, 52.5]);
 
-    svg
-      .selectAll("circle")
-      .data(mdsDat.topics)
-      .enter()
-      .append("circle")
-      .attr("cx", (_, i) => xScale(mdsDat.x[i]))
-      .attr("cy", (_, i) => yScale(mdsDat.y[i]))
-      .attr("r", (_, i) => rScale(mdsDat.Freq[i]))
-      .attr("fill", (_, i) => (i === selectedTopic ? "#4CAF50" : colorScale(mdsDat.Freq[i])))
-      .attr("opacity", (_, i) => (i === selectedTopic ? 1 : 0.7))
-      .attr("stroke", "black")
-      .attr("stroke-width", 1)
-      .on("click", (_, i) => setSelectedTopic(i));
+  // 툴팁 생성 (중복 생성 방지)
+  let tooltip = d3.select(".tooltip");
+  if (tooltip.empty()) {
+    tooltip = d3
+      .select("body")
+      .append("div")
+      .attr("class", "tooltip")
+      .style("position", "absolute")
+      .style("background", "white")
+      .style("border", "1px solid #ccc")
+      .style("border-radius", "5px")
+      .style("padding", "10px")
+      .style("box-shadow", "0px 0px 5px rgba(0,0,0,0.3)")
+      .style("pointer-events", "none")
+      .style("opacity", 0);
+  }
 
-    svg
-      .selectAll("text")
-      .data(mdsDat.topics)
-      .enter()
-      .append("text")
-      .attr("x", (_, i) => xScale(mdsDat.x[i]))
-      .attr("y", (_, i) => yScale(mdsDat.y[i]) - rScale(mdsDat.Freq[i]) - 5)
-      .attr("text-anchor", "middle")
-      .style("font-size", "12px")
-      .style("font-family", "Paperlogy")
-      .text((_, i) => `토픽 ${mdsDat.topics[i]} (${mdsDat.Freq[i].toFixed(1)}%)`);
-  }, [data, selectedTopic]);
+  svg
+    .selectAll("circle")
+    .data(mdsDat.topics)
+    .enter()
+    .append("circle")
+    .attr("cx", (_, i) => xScale(mdsDat.x[i]))
+    .attr("cy", (_, i) => yScale(mdsDat.y[i]))
+    .attr("r", (_, i) => rScale(mdsDat.Freq[i]))
+    .attr("fill", (_, i) => (i === selectedTopic ? "#4CAF50" : colorScale(mdsDat.Freq[i])))
+    .attr("opacity", (_, i) => (i === selectedTopic ? 1 : 0.7))
+    .attr("stroke", "black")
+    .attr("stroke-width", 1)
+    .on("mouseover", function (event, d) {
+      const topicIndex = mdsDat.topics.indexOf(d);
+      tooltip
+        .style("opacity", 1)
+        .html(`토픽 ${topicIndex + 1}<br>빈도: ${mdsDat.Freq[topicIndex].toFixed(2)}%`)
+        .style("left", `${event.pageX + 10}px`)
+        .style("top", `${event.pageY - 30}px`);
+      d3.select(this).attr("stroke", "orange").attr("stroke-width", 2); // 강조 효과
+    })
+    .on("mousemove", function (event) {
+      tooltip
+        .style("left", `${event.pageX + 10}px`)
+        .style("top", `${event.pageY - 30}px`);
+    })
+    .on("mouseout", function () {
+      tooltip
+        .style("opacity", 0)
+        .style("left", `-9999px`) // 화면 밖으로 이동
+        .style("top", `-9999px`); // 화면 밖으로 이동
+      d3.select(this).attr("stroke", "black").attr("stroke-width", 1); // 원래 상태로 복구
+    });
+
+  svg
+    .selectAll("text")
+    .data(mdsDat.topics)
+    .enter()
+    .append("text")
+    .attr("x", (_, i) => xScale(mdsDat.x[i]))
+    .attr("y", (_, i) => yScale(mdsDat.y[i]) - rScale(mdsDat.Freq[i]) - 5)
+    .attr("text-anchor", "middle")
+    .style("font-size", "12px")
+    .style("font-family", "Paperlogy")
+    .text((_, i) => `토픽 ${mdsDat.topics[i]} (${mdsDat.Freq[i].toFixed(1)}%)`);
+}, [data, selectedTopic]);
+
 
   useEffect(() => {
     if (!data.tinfo) {
@@ -165,6 +203,15 @@ const TopicAnalysis = ({ data }) => {
           <p style={{ fontFamily: "Paperlogy", fontSize: "14px", marginTop: "10px" }}>
             이 차트는 선택된 토픽에서 가장 많이 언급된 단어와 빈도를 나타냅니다.
           </p>
+          <input
+            type="range"
+            min={0}
+            max={1}
+            step={0.1}
+            value={lambda}
+            onChange={(e) => setLambda(Number(e.target.value))}
+          />
+          <span> 관련성 척도 = {lambda.toFixed(1)}</span>
         </div>
       </div>
       <div style={{ marginTop: "40px", textAlign: "center" }}>
@@ -175,15 +222,6 @@ const TopicAnalysis = ({ data }) => {
         <label style={{ fontFamily: "Paperlogy" }}>선택된 토픽: {selectedTopic + 1}</label>
         <button onClick={() => setSelectedTopic((prev) => Math.max(prev - 1, 0))}>이전 토픽</button>
         <button onClick={() => setSelectedTopic((prev) => Math.min(prev + 1, data.mdsDat.topics.length - 1))}>다음 토픽</button>
-        <input
-          type="range"
-          min={0}
-          max={1}
-          step={0.1}
-          value={lambda}
-          onChange={(e) => setLambda(Number(e.target.value))}
-        />
-        <span> 관련성 척도 = {lambda.toFixed(1)}</span>
       </div>
     </div>
   );
