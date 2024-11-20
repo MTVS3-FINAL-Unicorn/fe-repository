@@ -1,8 +1,39 @@
+@font-face {
+    font-family: 'Paperlogy';
+    src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/2408-3@1.0/Paperlogy-4Regular.woff2') format('woff2');
+    font-weight: 400;
+    font-style: normal;
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+#root {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
 .page-container {
-    font-family: Arial, sans-serif;
+    font-family: 'Paperlogy', sans-serif;
     color: #333;
-    width: 95%;
-    margin: 0 auto;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    overflow: hidden;
 }
 
 /* Header section */
@@ -12,83 +43,73 @@
     align-items: center;
     padding: 10px 20px;
     border-bottom: 2px solid #e0e0e0;
+    flex-shrink: 0;
+    background-color: #ffffff;
+    width: 100%;
+    height: 60px;
+    /* 고정된 높이 */
+    box-sizing: border-box;
 }
 
 .company-name {
     font-size: 24px;
     font-weight: bold;
     color: #333;
-}
-
-.meeting-title {
-    font-size: 18px;
-    color: #666;
-}
-
-/* Tab navigation */
-nav {
-    display: flex;
-    gap: 10px;
-    margin-top: 20px;
-    padding: 20px;
-    border-bottom: 2px solid #e0e0e0;
-    overflow-x: auto;
-    /* 넘칠 때 가로 스크롤 가능 */
     white-space: nowrap;
-    /* 버튼이 한 줄로 정렬되도록 설정 */
-    width: 100vw;
-    /* 화면 전체 너비에 고정 */
-    box-sizing: border-box;
-    /* 패딩이 포함된 너비로 설정 */
-    max-width: 100%;
-    /* 최대 너비 제한 */
 }
 
-nav::-webkit-scrollbar {
-    height: 6px;
-    /* 스크롤바 높이 */
+/* Navigation Bar */
+.nav-bar {
+    display: flex;
+    gap: 20px;
 }
 
-nav::-webkit-scrollbar-thumb {
-    background-color: #ccc;
-    /* 스크롤바 색상 */
-    border-radius: 10px;
-}
-
-nav::-webkit-scrollbar-track {
-    background: #f0f0f0;
-}
-
-/* 탭 버튼 스타일 */
-nav button {
-    background-color: #b1afb8;
-    border: 1px solid #d0d0d0;
-    border-radius: 5px;
-    padding: 10px 15px;
+.nav-item {
+    font-size: 20px;
     cursor: pointer;
-    font-size: 14px;
+    padding: 5px 10px;
+    color: #555;
+    transition: color 0.3s;
+    position: relative;
+}
+
+.nav-item:hover {
     color: #333;
-    transition: background-color 0.2s, color 0.2s;
-    flex-shrink: 0;
-    /* 버튼이 줄어들지 않도록 설정 */
 }
 
-nav button:hover {
-    background-color: #a185f0;
-    color: #fff;
+.nav-item.active {
+    font-weight: bold;
+    color: #333;
 }
 
-nav button:active,
-nav button:focus {
+.nav-item.active::after {
+    content: '';
+    display: block;
+    height: 2px;
     background-color: #333;
-    color: #fff;
-    outline: none;
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    right: 0;
 }
 
-/* 선택된 탭 버튼 */
-nav button.selected {
-    background-color: #a185f0;
-    color: #fff;
+/* Content section */
+.content {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    padding: 20px;
+    background-color: #f9f9f9;
+    box-sizing: border-box;
+}
+
+/* Charts and detailed sections */
+.chart-container {
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 10px 0;
 }
 
 .preference-chart {
@@ -98,16 +119,6 @@ nav button.selected {
     text-align: center;
     margin: 0 auto;
     padding: 20px;
-}
-
-.chart-container {
-    width: 100%;
-    /* Make it responsive */
-    max-width: 500px;
-    /* Limit chart width */
-    margin: 0 auto;
-    padding: 10px 0;
-    /* Space around the chart */
 }
 
 .preference-chart h2 {
