@@ -135,11 +135,21 @@ const DetailedContent = () => {
               style={styles.questionItem}
               onClick={() => handleQuestionClick(item.id)}
             >
-              <p style={styles.question}>{item.question}</p>
+              {/* 질문 영역 */}
+              <p style={styles.question}>
+                Q. {item.question}
+                <span style={styles.questionAfter}></span>
+              </p>
+
+              {/* 답변 영역 */}
               <ul style={styles.answerList}>
                 {item.answers.map((answer, index) => (
-                  <li key={index} style={styles.answer}>
-                    {answer}
+                  <li
+                    key={index}
+                    style={styles.answer}
+                  >
+                    A. {answer}
+                    <span style={styles.answerAfter}></span>
                   </li>
                 ))}
               </ul>
@@ -181,26 +191,27 @@ const styles = {
     backgroundColor: "#f9f9f9",
   },
   leftPaneCollapsed: {
-    width: "95%",
+    width: "97%",
     padding: "20px",
     backgroundColor: "#ffffff",
     overflowY: "auto",
   },
   leftPaneExpanded: {
-    width: "60%",
+    width: "30%",
     padding: "10px 20px",
     backgroundColor: "#ffffff",
     borderRight: "1px solid #ddd",
     overflowY: "auto",
   },
   rightPane: {
-    width: "40%",
+    width: "70%",
     padding: "20px",
     backgroundColor: "#ffffff",
     overflowY: "auto",
     position: "relative",
   },
   title: {
+    textAlign: "center",
     fontSize: "24px",
     fontWeight: "bold",
     marginBottom: "20px",
@@ -208,29 +219,73 @@ const styles = {
   questionList: {
     listStyleType: "none",
     padding: "0",
-    margin: "0",
+    width: "fit-content",
+    margin: "0 auto",
   },
   questionItem: {
     marginBottom: "20px",
     padding: "15px",
     borderRadius: "8px",
-    backgroundColor: "#f0f0f0",
     cursor: "pointer",
     transition: "background-color 0.3s",
   },
   question: {
-    fontSize: "20px",
-    fontWeight: "bold",
+    backgroundColor: "#000", // 검정색 배경
+    color: "#fff",           // 흰색 글자
+    padding: "15px",         // 패딩을 키움
+    borderRadius: "10px",
     marginBottom: "10px",
+    fontSize: "18px",
+    fontWeight: "bold",
+    position: "relative",
+    width: "fit-content",
+    maxWidth: "80%",
+    textAlign: "left",
+    marginLeft: "0", // 좌측 정렬
+    marginRight: "auto",
+  },
+  questionAfter: {
+    content: "''",
+    position: "absolute",
+    top: "10px",
+    left: "-10px",
+    width: "0",
+    height: "0",
+    border: "10px solid transparent",
+    borderRightColor: "#000", // 말풍선 꼬리 색상
+    borderLeft: "0",
+    marginTop: "-5px",
   },
   answerList: {
-    listStyleType: "disc",
-    paddingLeft: "20px",
-    margin: "0",
+    marginTop: "10px",
+    paddingLeft: "0",
+    listStyleType: "none", // 불릿 제거
   },
   answer: {
-    marginBottom: "5px",
-    fontSize: "16px",
+    backgroundColor: "#f0f0f0", // 밝은 배경
+    color: "#333",             // 어두운 글자색
+    padding: "10px",
+    borderRadius: "10px",
+    marginBottom: "10px",
+    border: "1px solid #ddd",
+    position: "relative",
+    width: "fit-content",
+    maxWidth: "80%",
+    textAlign: "left",
+    marginLeft: "auto", // 우측 정렬
+    marginRight: "0",
+  },
+  answerAfter: {
+    content: "''",
+    position: "absolute",
+    top: "10px",
+    right: "-10px",
+    width: "0",
+    height: "0",
+    border: "10px solid transparent",
+    borderLeftColor: "#f0f0f0", // 말풍선 꼬리 색상
+    borderRight: "0",
+    marginTop: "-5px",
   },
   analysisContainer: {
     padding: "20px",
