@@ -4,6 +4,7 @@ import WordCloud from '../components/WordCloud';
 import TopicAnalysis from '../components/TopicAnalysis';
 import SentimentAnalysis from '../components/SentimentAnalysis';
 import DetailedContent from '../components/DetailedContent';
+import EmbeddingVisualization from '../components/EmbeddingVisualization';
 import '../css/ResultsPage.css';
 
 const ResultsPage = ({ meetingId = 1 }) => {
@@ -25,11 +26,13 @@ const ResultsPage = ({ meetingId = 1 }) => {
       try {
         if (selectedTab === 'Overall') {
           const data = await getReportsByMeetingId(meetingId);
+              console.log("Fetched Reports:", data);
           setReports(data);
         } else {
           const selectedQuestion = questions.find((q) => q.content === selectedTab);
           if (selectedQuestion) {
             const data = await getReportsByQuestionId(selectedQuestion.questionId);
+                console.log("Fetched Reports:", data);
             setReports(data);
           }
         }
@@ -75,15 +78,28 @@ const OverallAnalysis = ({ reports }) => {
   const wordcloudData = reports.find((report) => report.analysisType === 'wordcloud');
   const topicData = reports.find((report) => report.analysisType === 'topicAnalysis');
   const sentimentData = reports.find((report) => report.analysisType === 'sentimentAnalysis');
+  const embeddingData = reports.find((report) => report.analysisType === 'embeddingAnalysis');
+
+  const parseJSONSafe = (jsonString) => {
+    try {
+      return JSON.parse(jsonString);
+    } catch (error) {
+      console.error('Failed to parse JSON:', error.message);
+      return null;
+    }
+  };
 
   return (
     <div>
       {wordcloudData && <WordCloud imageSrc={wordcloudData.analysisResult} />}
       {topicData && (
-        <TopicAnalysis data={JSON.parse(topicData.analysisResult)} />
+        <TopicAnalysis data={parseJSONSafe(topicData.analysisResult)} />
       )}
       {sentimentData && (
-        <SentimentAnalysis sentimentData={JSON.parse(sentimentData.analysisResult)} />
+        <SentimentAnalysis sentimentData={parseJSONSafe(sentimentData.analysisResult)} />
+      )}
+      {embeddingData && (
+        <EmbeddingVisualization embeddingData={embeddingData.analysisResult} />
       )}
     </div>
   );

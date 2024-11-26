@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { getQuestionsByMeetingId } from '../utils/api';
+import { getQuestionsByMeetingId, getReportsByQuestionId } from '../utils/api';
+import WordCloud from '../components/WordCloud';
+import TopicAnalysis from '../components/TopicAnalysis';
+import SentimentAnalysis from '../components/SentimentAnalysis';
 
 const typeMapping = {
   VOICE: '음성형',
@@ -10,11 +13,12 @@ const typeMapping = {
 const DetailedContent = () => {
   const [questions, setQuestions] = useState([]);
   const [selectedQuestion, setSelectedQuestion] = useState(null);
+  const [reports, setReports] = useState([]);
 
   useEffect(() => {
     const fetchQuestions = async () => {
+      const meetingId = 1;
       try {
-        const meetingId = 1; // Replace with your actual meetingId
         const data = await getQuestionsByMeetingId(meetingId);
         setQuestions(data);
       } catch (error) {
@@ -23,6 +27,23 @@ const DetailedContent = () => {
     };
     fetchQuestions();
   }, []);
+
+  const handleQuestionClick = async (id) => {
+    if (selectedQuestion === id) {
+      setSelectedQuestion(null);
+      setReports([]);
+      return;
+    }
+
+    try {
+      setSelectedQuestion(id);
+      const data = await getReportsByQuestionId(id);
+      setReports(data);
+      console.log(data);
+    } catch (error) {
+      console.error('Failed to fetch reports for question:', error);
+    }
+  };
 
   // 질문과 답변 데이터
   const answers = {
@@ -105,10 +126,6 @@ const DetailedContent = () => {
     },
   };
 
-  const handleQuestionClick = (id) => {
-    setSelectedQuestion((prevId) => (prevId === id ? null : id));
-  };
-
   return (
     <div style={styles.container}>
       <div style={styles.leftPane}>
@@ -148,19 +165,45 @@ const DetailedContent = () => {
       {selectedQuestion && (
         <div style={styles.rightPane}>
           <h3 style={styles.analysisTitle}>
-            {analysisData[selectedQuestion]?.question}
+            {questions.find((q) => q.questionId === selectedQuestion)?.content}
           </h3>
-          <p style={styles.analysisText}>
-            {analysisData[selectedQuestion]?.analysis}
-          </p>
-          <h4 style={styles.pointTitle}>주요 포인트</h4>
-          <ul style={styles.pointList}>
-            {analysisData[selectedQuestion]?.point.map((point, index) => (
-              <li key={index} style={styles.pointItem}>
-                {point}
-              </li>
-            ))}
-          </ul>
+          <div style={styles.analysisContent}>
+            {reports.map((report) => {
+              if (report.analysisType === 'wordcloud') {
+                return (
+                  <WordCloud
+                    key={report.reportId}
+                    imageSrc={report.analysisResult}
+                  />
+                );
+              } else if (report.analysisType === 'topicAnalysis') {
+                try {
+                  const parsedData = JSON.parse(report.analysisResult);
+                  return (
+                    <TopicAnalysis
+                      key={report.reportId}
+                      data={parsedData}
+                    />
+                  );
+                } catch (error) {
+                  console.error('Failed to parse topic analysis:', error);
+                }
+              } else if (report.analysisType === 'sentimentAnalysis') {
+                try {
+                  const parsedData = JSON.parse(report.analysisResult);
+                  return (
+                    <SentimentAnalysis
+                      key={report.reportId}
+                      sentimentData={parsedData}
+                    />
+                  );
+                } catch (error) {
+                  console.error('Failed to parse sentiment analysis:', error);
+                }
+              }
+              return null;
+            })}
+          </div>
         </div>
       )}
     </div>
@@ -290,6 +333,11 @@ const styles = {
   analysisText: {
     fontSize: "16px",
     marginBottom: "20px",
+  },
+  analysisContent: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '20px',
   },
   pointTitle: {
     fontSize: "16px",
