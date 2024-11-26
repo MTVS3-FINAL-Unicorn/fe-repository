@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { getQuestionsByMeetingId, getReportsByQuestionId } from '../utils/api';
+import { getQuestionsByMeetingId, getReportsByQuestionId, getPreferenceAnswers } from '../utils/api';
+import { Bar } from 'react-chartjs-2';
 import WordCloud from '../components/WordCloud';
-import TopicAnalysis from '../components/TopicAnalysis';
+import EachTopicAnalysis from '../components/EachTopicAnalysis';
+import EmbeddingVisualization from '../components/EmbeddingVisualization';
 import EachSentimentAnalysis from '../components/EachSentimentAnalysis';
+import PreferenceChart from '../components/PreferenceChart';
 
 const typeMapping = {
   VOICE: '음성형',
@@ -14,6 +17,7 @@ const DetailedContent = () => {
   const [questions, setQuestions] = useState([]);
   const [selectedQuestion, setSelectedQuestion] = useState(null);
   const [reports, setReports] = useState([]);
+  const [preferenceAnswers, setPreferenceAnswers] = useState(null);
 
   useEffect(() => {
     const fetchQuestions = async () => {
@@ -28,21 +32,64 @@ const DetailedContent = () => {
     fetchQuestions();
   }, []);
 
-  const handleQuestionClick = async (id) => {
+  const handleQuestionClick = async (id, type) => {
     if (selectedQuestion === id) {
       setSelectedQuestion(null);
       setReports([]);
+      setPreferenceAnswers(null);
       return;
     }
 
     try {
       setSelectedQuestion(id);
-      const data = await getReportsByQuestionId(id);
-      setReports(data);
-      console.log(data);
+      if (type === 'PREFERENCE') {
+        // Fetch preference answers for PREFERENCE type questions
+        const preferenceData = await getPreferenceAnswers(id);
+        setPreferenceAnswers(preferenceData);
+        setReports([]); // Clear previous reports since this type only shows answers
+      } else {
+        // Fetch analysis reports for other question types
+        const data = await getReportsByQuestionId(id);
+        setReports(data);
+        setPreferenceAnswers(null); // Clear previous answers
+      }
     } catch (error) {
       console.error('Failed to fetch reports for question:', error);
     }
+  };
+
+  const analyzePreferenceAnswers = () => {
+    const counts = {};
+    preferenceAnswers.forEach((answer) => {
+      if (counts[answer.content]) {
+        counts[answer.content]++;
+      } else {
+        counts[answer.content] = 1;
+      }
+    });
+
+    return {
+      labels: Object.keys(counts),
+      datasets: [
+        {
+          label: '응답 개수',
+          data: Object.values(counts),
+          backgroundColor: 'rgba(75, 192, 192, 0.6)',
+          borderColor: 'rgba(75, 192, 192, 1)',
+          borderWidth: 1,
+        },
+      ],
+    };
+  };
+
+  const preferenceChartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: 'top',
+      },
+    },
   };
 
   // 질문과 답변 데이터
@@ -137,7 +184,7 @@ const DetailedContent = () => {
                 {/* Question */}
                 <p
                   style={styles.question}
-                  onClick={() => handleQuestionClick(question.questionId)}
+                  onClick={() => handleQuestionClick(question.questionId, question.type)}
                 >
                   Q. {question.content} ({typeMapping[question.type]})
                   <span style={styles.questionAfter}></span>
@@ -165,44 +212,64 @@ const DetailedContent = () => {
       {selectedQuestion && (
         <div style={styles.rightPane}>
           <h3 style={styles.analysisTitle}>
-            {questions.find((q) => q.questionId === selectedQuestion)?.content}
+            {selectedQuestion &&
+              `Q. ${
+                questions.find((q) => q.questionId === selectedQuestion)?.content
+              } (${
+                typeMapping[questions.find((q) => q.questionId === selectedQuestion)?.type]
+              })`}
           </h3>
           <div style={styles.analysisContent}>
-            {reports.map((report) => {
-              if (report.analysisType === 'wordcloud') {
-                return (
-                  <WordCloud
-                    key={report.reportId}
-                    imageSrc={report.analysisResult}
-                  />
-                );
-              } else if (report.analysisType === 'topicAnalysis') {
-                try {
-                  const parsedData = JSON.parse(report.analysisResult);
-                  return (
-                    <TopicAnalysis
-                      key={report.reportId}
-                      data={parsedData}
-                    />
-                  );
-                } catch (error) {
-                  console.error('Failed to parse topic analysis:', error);
+            {preferenceAnswers ? (
+              <div>
+                <div style={styles.chart}>
+                  {/* Pass the selected question ID to PreferenceChart */}
+                  <PreferenceChart questionId={selectedQuestion} />
+                </div>
+              </div>
+            ) : (
+              reports.map((report) => {
+                switch (report.analysisType) {
+                  // case 'wordcloud':
+                  //   return (
+                  //     <WordCloud
+                  //       key={report.reportId}
+                  //       imageSrc={report.analysisResult}
+                  //     />
+                  //   );
+                  case 'topicAnalysis':
+                    try {
+                      const parsedData = JSON.parse(report.analysisResult);
+                      return <EachTopicAnalysis key={report.reportId} data={parsedData} />;
+                    } catch (error) {
+                      console.error('Failed to parse topic analysis:', error);
+                    }
+                    break;
+                  case 'sentimentAnalysis':
+                    try {
+                      const parsedData = JSON.parse(report.analysisResult);
+                      return (
+                        <EachSentimentAnalysis
+                          key={report.reportId}
+                          sentimentData={parsedData}
+                        />
+                      );
+                    } catch (error) {
+                      console.error('Failed to parse sentiment analysis:', error);
+                    }
+                    break;
+                  case 'embeddingAnalysis':
+                      return (
+                        <EmbeddingVisualization
+                          key={report.reportId}
+                          tensorBoardUrl={report.analysisResult}
+                        />
+                      );
+                  default:
+                    return null;
                 }
-              } else if (report.analysisType === 'sentimentAnalysis') {
-                try {
-                  const parsedData = JSON.parse(report.analysisResult);
-                  return (
-                    <EachSentimentAnalysis
-                      key={report.reportId}
-                      sentimentData={parsedData}
-                    />
-                  );
-                } catch (error) {
-                  console.error('Failed to parse sentiment analysis:', error);
-                }
-              }
-              return null;
-            })}
+              })
+            )}
           </div>
         </div>
       )}
@@ -212,9 +279,8 @@ const DetailedContent = () => {
 
 // 스타일 정의
 const styles = {
-  container: {
+   container: {
     display: "flex",
-    height: "100vh",
     backgroundColor: "#f9f9f9",
   },
   leftPaneCollapsed: {
@@ -232,12 +298,15 @@ const styles = {
   },
   rightPane: {
     width: "70%",
-    padding: "20px",
+    margin: "0 20px",
     backgroundColor: "#ffffff",
-    overflowY: "auto",
-    position: "relative",
+    height: "80vh", // 뷰포트 높이에 맞춤
+    overflowY: "auto", // 스크롤 가능
+    alignSelf: "flex-start",
+    position: "sticky", // 플로팅 효과를 위해 sticky 사용
+    top: "20px", // 뷰포트 상단에서의 고정 위치
   },
-  title: {
+   title: {
     textAlign: "center",
     fontSize: "24px",
     fontWeight: "bold",
@@ -257,9 +326,9 @@ const styles = {
     transition: "background-color 0.3s",
   },
   question: {
-    backgroundColor: "#000", // 검정색 배경
-    color: "#fff",           // 흰색 글자
-    padding: "15px",         // 패딩을 키움
+    backgroundColor: "#000",
+    color: "#fff",
+    padding: "15px",
     borderRadius: "10px",
     marginBottom: "10px",
     fontSize: "18px",
@@ -268,7 +337,7 @@ const styles = {
     width: "fit-content",
     maxWidth: "80%",
     textAlign: "left",
-    marginLeft: "0", // 좌측 정렬
+    marginLeft: "0",
     marginRight: "auto",
   },
   questionAfter: {
@@ -279,7 +348,7 @@ const styles = {
     width: "0",
     height: "0",
     border: "10px solid transparent",
-    borderRightColor: "#000", // 말풍선 꼬리 색상
+    borderRightColor: "#000",
     borderLeft: "0",
     marginTop: "-5px",
   },
@@ -329,6 +398,10 @@ const styles = {
     fontSize: "18px",
     fontWeight: "bold",
     marginBottom: "10px",
+    backgroundColor: "#000", // 검정 배경
+    color: "#fff",           // 흰색 글씨
+    padding: "20px 10px",         // 패딩 추가
+    textAlign: "center",     // 텍스트 중앙 정렬
   },
   analysisText: {
     fontSize: "16px",

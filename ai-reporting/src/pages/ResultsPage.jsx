@@ -26,13 +26,11 @@ const ResultsPage = ({ meetingId = 1 }) => {
       try {
         if (selectedTab === 'Overall') {
           const data = await getReportsByMeetingId(meetingId);
-              console.log("Fetched Reports:", data);
           setReports(data);
         } else {
           const selectedQuestion = questions.find((q) => q.content === selectedTab);
           if (selectedQuestion) {
             const data = await getReportsByQuestionId(selectedQuestion.questionId);
-                console.log("Fetched Reports:", data);
             setReports(data);
           }
         }

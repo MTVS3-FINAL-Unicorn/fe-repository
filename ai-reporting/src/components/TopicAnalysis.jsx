@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import * as d3 from "d3";
 
 const TopicAnalysis = ({ data }) => {
+  console.log(data);
   const [selectedTopic, setSelectedTopic] = useState(0); // 기본 선택 토픽
   const [lambda, setLambda] = useState(1); // 관련성 조정 슬라이더 값
   const svgRef = useRef();
@@ -187,8 +188,8 @@ const TopicAnalysis = ({ data }) => {
   return (
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", margin: "20px" }}>
       <h2 style={{ fontFamily: "Paperlogy", marginBottom: "5px" }}>토픽 분석</h2> {/* 간격 조정 */}
-      <p style={{ fontFamily: "Paperlogy", marginTop: "0px" }}> {/* 간격 조정 */}
-        토픽 분석은 데이터에서 주요 주제를 추출하고 이를 시각적으로 표현하는 과정입니다.
+      <p style={{ fontFamily: "Paperlogy", marginTop: "0px", textAlign: "center"}}> {/* 간격 조정 */}
+        토픽 분석은 데이터에서 주요 주제를 추출하고 이를 시각적으로 표현하는 과정입니다.<br/>
         아래 차트는 토픽 간의 관계와 각 토픽 내 주요 단어를 보여줍니다.
       </p>
       <div style={{ display: "flex", justifyContent: "center", gap: "40px" }}>
@@ -234,7 +235,7 @@ const TopicAnalysis = ({ data }) => {
             padding: "8px 12px",
             fontFamily: "Paperlogy",
             fontSize: "14px",
-            backgroundColor: "#A5D8FF",
+            backgroundColor: "#ddd",
             border: "none",
             borderRadius: "5px",
             cursor: "pointer",
@@ -248,7 +249,7 @@ const TopicAnalysis = ({ data }) => {
             padding: "8px 12px",
             fontFamily: "Paperlogy",
             fontSize: "14px",
-            backgroundColor: "#A5D8FF",
+            backgroundColor: "#ddd",
             border: "none",
             borderRadius: "5px",
             cursor: "pointer",
