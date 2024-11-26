@@ -1,91 +1,76 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { getQuestionsByMeetingId } from '../utils/api';
+
+const typeMapping = {
+  VOICE: '음성형',
+  TEXT: '설문형',
+  PREFERENCE: '선호도형',
+};
 
 const DetailedContent = () => {
+  const [questions, setQuestions] = useState([]);
   const [selectedQuestion, setSelectedQuestion] = useState(null);
 
+  useEffect(() => {
+    const fetchQuestions = async () => {
+      try {
+        const meetingId = 1; // Replace with your actual meetingId
+        const data = await getQuestionsByMeetingId(meetingId);
+        setQuestions(data);
+      } catch (error) {
+        console.error('Failed to fetch questions:', error);
+      }
+    };
+    fetchQuestions();
+  }, []);
+
   // 질문과 답변 데이터
-  const scriptData = [
-    {
-      id: 'Q1',
-      question: '버든 백을 사용하며 느낀 가장 큰 장점은?',
-      answers: [
-        '버든 백은 심플한 디자인 덕분에 어떤 옷에도 잘 어울립니다. 또 가벼우면서도 내구성이 뛰어나 외출할 때 항상 들고 나가요.',
-        '학생으로서 많은 짐을 들고 다니는데, 버든 백은 크기가 적당하고 튼튼해서 정말 좋아요. 특히, 원단이 업사이클링 소재라는 점이 멋있습니다.',
-        '아이들과 공원에 갈 때 물, 간식, 옷가지를 넣어도 공간이 넉넉해서 만족스러웠습니다. 무엇보다도 세탁하기 쉬운 소재라는 점이 정말 편리했어요.',
-        '가방 하나로 스타일링을 완성할 수 있어 자주 사용합니다. 또한, 환경을 생각하는 브랜드라는 점에서 구매에 대한 자부심을 느껴요.',
-        '버든 백은 비 오는 날에도 내용물이 젖지 않아 좋았어요. 원단 자체가 방수 기능이 있어 가방 안의 책과 물건을 안전하게 지켜줍니다.',
-        '매일 노트북을 넣고 출퇴근을 하는데, 스트랩이 튼튼하고 어깨에 무리가 가지 않아서 좋습니다.',
-        '버든 백은 튼튼한 소재 덕분에 짐이 많아도 형태가 잘 유지됩니다. 어떤 자리에서도 과하지 않고 세련돼 보입니다.',
-        '마트에서 장 본 물건들을 담아도 무겁지 않게 들고 다닐 수 있었습니다. 튼튼한 손잡이가 특히 마음에 들어요.',
-      ],
-    },
-    {
-      id: 'Q2',
-      question: '버든 백의 개선 방향은 무엇일까요?',
-      answers: [
-        '색상 옵션이 더 다양해졌으면 좋겠어요. 지금의 미니멀한 디자인은 좋지만, 더 밝고 산뜻한 색상도 있었으면 합니다.',
-        '가방 내부에 더 많은 수납 공간이나 작은 포켓이 추가되면 좋을 것 같아요. 노트북 외에 작은 물건을 정리하기가 조금 아쉬웠습니다.',
-        '아이들과 함께 사용할 수 있는 더 큰 크기의 버든 백이 출시된다면 좋겠습니다.',
-        '버든 백의 소재에 대한 상세한 설명이 라벨이나 태그에 추가되면 좋겠어요. 업사이클링 과정에 대해 더 알고 싶습니다.',
-        '스트랩 길이를 조절할 수 있는 기능이 있다면 더 많은 사람들이 편리하게 사용할 수 있을 것 같아요.',
-        '내부에 방수 처리된 포켓이 추가되면 좋겠습니다. 텀블러나 물병을 넣을 때 유용할 것 같아요.',
-        '가방 외부에 작은 포켓이 있다면 지갑이나 열쇠 같은 자주 사용하는 물건을 쉽게 꺼낼 수 있을 것 같습니다.',
-        '가방 하단에 더 단단한 보강이 있으면 장을 볼 때 더 안정감 있게 사용할 수 있을 것 같아요.',
-      ],
-    },
-    {
-       id: 'Q3',
-       question: '신제품 추가 방향으로 가장 기대되는 콘셉트는?',
-       answers: [
-        '업사이클링 소재로 제작된 소형 액세서리 (예: 지갑, 파우치).',
-        '더 큰 사이즈의 버든 백 (피크닉이나 여행용).',
-        '노트북 전용 가방.',
-        '다양한 색상과 패턴이 추가된 기존 버든 백.',
-      ],
-    },
-    {
-       id: 'Q4',
-       question: '버든 백 브랜드관에서 보고 싶은 정보는?',
-       answers: [
-        '버든 백 제작 과정을 소개하는 영상.',
-        '내구성 테스트 및 인증 자료.',
-        '가족을 위한 활용 팁.',
-        '환경 보호와 관련된 캠페인 기록.',
-        '재활용 소재 사용 데이터.',
-        '실제 사용 사례와 고객 리뷰.',
-        '업사이클링 과정과 경제적 효과.',
-        '다른 브랜드와의 협업 사례.',
-      ],
-    },
-    {
-       id: 'Q5',
-       question: '추가로 기대되는 서비스는 무엇인가요?',
-       answers: [
-        '제품 수리 및 교환 서비스.',
-        '업사이클링 체험 프로그램.',
-        '구독형 제품 대여 서비스.',
-        '맞춤형 가방 제작 서비스.',
-      ],
-    },
-    {
-       id: 'Q6',
-       question: '버든 백이 소비자들에게 어떤 메시지를 전달한다고 생각하시나요?',
-        answers: [
-        '지속 가능한 소비를 위한 우리의 작은 실천이 환경에 큰 변화를 줄 수 있다는 메시지를 전달한다고 생각합니다.',
-        '업사이클링이라는 개념이 얼마나 세련되고 실용적일 수 있는지를 보여줍니다.',
-        '환경을 위한 선택이 일상 속에서도 가능하다는 희망을 줍니다.',
-        '스타일과 실용성을 포기하지 않아도 환경을 보호할 수 있다는 강력한 메시지입니다.',
-        '나의 소비가 곧 지구를 위한 행동이라는 중요한 가치를 느끼게 해줍니다.',
-        '환경 보호는 누구나 쉽게 실천할 수 있다는 것을 알려줍니다.',
-        '친환경적인 선택이 특별하지 않고, 당연한 소비의 일환이 될 수 있음을 보여줍니다.',
-        '아이들에게도 환경 보호의 중요성을 자연스럽게 알릴 수 있는 기회가 됩니다.',
-      ],
-    }
-  ];
+  const answers = {
+    1: [
+      '버든 백은 심플한 디자인 덕분에 어떤 옷에도 잘 어울립니다. 또 가벼우면서도 내구성이 뛰어나 외출할 때 항상 들고 나가요.',
+      '학생으로서 많은 짐을 들고 다니는데, 버든 백은 크기가 적당하고 튼튼해서 정말 좋아요. 특히, 원단이 업사이클링 소재라는 점이 멋있습니다.',
+      '아이들과 공원에 갈 때 물, 간식, 옷가지를 넣어도 공간이 넉넉해서 만족스러웠습니다. 무엇보다도 세탁하기 쉬운 소재라는 점이 정말 편리했어요.',
+      '가방 하나로 스타일링을 완성할 수 있어 자주 사용합니다. 또한, 환경을 생각하는 브랜드라는 점에서 구매에 대한 자부심을 느껴요.',
+      '버든 백은 비 오는 날에도 내용물이 젖지 않아 좋았어요. 원단 자체가 방수 기능이 있어 가방 안의 책과 물건을 안전하게 지켜줍니다.',
+      '매일 노트북을 넣고 출퇴근을 하는데, 스트랩이 튼튼하고 어깨에 무리가 가지 않아서 좋습니다.',
+      '버든 백은 튼튼한 소재 덕분에 짐이 많아도 형태가 잘 유지됩니다. 어떤 자리에서도 과하지 않고 세련돼 보입니다.',
+      '마트에서 장 본 물건들을 담아도 무겁지 않게 들고 다닐 수 있었습니다. 튼튼한 손잡이가 특히 마음에 들어요.',
+    ],
+    2: [
+      '색상 옵션이 더 다양해졌으면 좋겠어요. 지금의 미니멀한 디자인은 좋지만, 더 밝고 산뜻한 색상도 있었으면 합니다.',
+      '가방 내부에 더 많은 수납 공간이나 작은 포켓이 추가되면 좋을 것 같아요. 노트북 외에 작은 물건을 정리하기가 조금 아쉬웠습니다.',
+      '아이들과 함께 사용할 수 있는 더 큰 크기의 버든 백이 출시된다면 좋겠습니다.',
+      '버든 백의 소재에 대한 상세한 설명이 라벨이나 태그에 추가되면 좋겠어요. 업사이클링 과정에 대해 더 알고 싶습니다.',
+      '스트랩 길이를 조절할 수 있는 기능이 있다면 더 많은 사람들이 편리하게 사용할 수 있을 것 같아요.',
+      '내부에 방수 처리된 포켓이 추가되면 좋겠습니다. 텀블러나 물병을 넣을 때 유용할 것 같아요.',
+      '가방 외부에 작은 포켓이 있다면 지갑이나 열쇠 같은 자주 사용하는 물건을 쉽게 꺼낼 수 있을 것 같습니다.',
+      '가방 하단에 더 단단한 보강이 있으면 장을 볼 때 더 안정감 있게 사용할 수 있을 것 같아요.',
+    ],
+    4: [
+      '버든 백 제작 과정을 소개하는 영상.',
+      '내구성 테스트 및 인증 자료.',
+      '가족을 위한 활용 팁.',
+      '환경 보호와 관련된 캠페인 기록.',
+      '재활용 소재 사용 데이터.',
+      '실제 사용 사례와 고객 리뷰.',
+      '업사이클링 과정과 경제적 효과.',
+      '다른 브랜드와의 협업 사례.',
+    ],
+    6: [
+      '지속 가능한 소비를 위한 우리의 작은 실천이 환경에 큰 변화를 줄 수 있다는 메시지를 전달한다고 생각합니다.',
+      '업사이클링이라는 개념이 얼마나 세련되고 실용적일 수 있는지를 보여줍니다.',
+      '환경을 위한 선택이 일상 속에서도 가능하다는 희망을 줍니다.',
+      '스타일과 실용성을 포기하지 않아도 환경을 보호할 수 있다는 강력한 메시지입니다.',
+      '나의 소비가 곧 지구를 위한 행동이라는 중요한 가치를 느끼게 해줍니다.',
+      '환경 보호는 누구나 쉽게 실천할 수 있다는 것을 알려줍니다.',
+      '친환경적인 선택이 특별하지 않고, 당연한 소비의 일환이 될 수 있음을 보여줍니다.',
+      '아이들에게도 환경 보호의 중요성을 자연스럽게 알릴 수 있는 기회가 됩니다.',
+    ],
+  };
 
   // 분석 데이터
   const analysisData = {
-    Q1: {
+    1: {
       question: '버든 백을 사용하며 느낀 가장 큰 장점은?',
       analysis: '사용자들이 심플한 디자인과 내구성을 선호하는 것으로 분석됩니다.',
           point: ['심플한 디자인과 내구성 덕분에 어떤 옷에도 잘 어울리며, 외출 시 항상 사용하기 좋은 가방입니다.',
@@ -93,27 +78,27 @@ const DetailedContent = () => {
               '수납공간과 방수 기능이 뛰어나 실용적이고 다양한 상황에서 편리하게 사용할 수 있습니다.',
             ],
     },
-    Q2: {
+    2: {
       question: '버든 백의 개선 방향은 무엇일까요?',
       analysis: '수납 공간 부족과 스트랩 길이 조정 문제를 개선해야 한다는 의견이 다수입니다.',
       point: ['수납 공간', '스트랩 길이 조정', '사용 편리성'],
       },
-    Q3: {
+    3: {
       question: '버든 백을 사용하며 느낀 가장 큰 장점은?',
       analysis: '사용자들이 심플한 디자인과 내구성을 선호하는 것으로 분석됩니다.',
       point: ['심플한 디자인', '내구성', '다용도'],
     },
-    Q4: {
+    4: {
       question: '버든 백의 개선 방향은 무엇일까요?',
       analysis: '수납 공간 부족과 스트랩 길이 조정 문제를 개선해야 한다는 의견이 다수입니다.',
       point: ['수납 공간', '스트랩 길이 조정', '사용 편리성'],
       },
-    Q5: {
+    5: {
       question: '버든 백을 사용하며 느낀 가장 큰 장점은?',
       analysis: '사용자들이 심플한 디자인과 내구성을 선호하는 것으로 분석됩니다.',
       point: ['심플한 디자인', '내구성', '다용도'],
     },
-    Q6: {
+    6: {
       question: '버든 백의 개선 방향은 무엇일까요?',
       analysis: '수납 공간 부족과 스트랩 길이 조정 문제를 개선해야 한다는 의견이 다수입니다.',
       point: ['수납 공간', '스트랩 길이 조정', '사용 편리성'],
@@ -125,30 +110,31 @@ const DetailedContent = () => {
   };
 
   return (
-    <div style={{ ...styles.container, flexDirection: selectedQuestion ? "row" : "column" }}>
-      <div style={selectedQuestion ? styles.leftPaneExpanded : styles.leftPaneCollapsed}>
-        <h2 style={styles.title}>좌담회 전체 내용</h2>
+    <div style={styles.container}>
+      <div style={styles.leftPane}>
+        <h2 style={styles.title}>좌담회 스크립트</h2>
         <ul style={styles.questionList}>
-          {scriptData.map((item) => (
-            <li
-              key={item.id}
-              style={styles.questionItem}
-              onClick={() => handleQuestionClick(item.id)}
-            >
-              {/* 질문 영역 */}
-              <p style={styles.question}>
-                Q. {item.question}
-                <span style={styles.questionAfter}></span>
-              </p>
-
-              {/* 답변 영역 */}
+          {questions.map((question) => (
+            <li key={question.questionId} style={styles.questionItem}>
+              <div style={styles.questionContainer}>
+                {/* Question */}
+                <p
+                  style={styles.question}
+                  onClick={() => handleQuestionClick(question.questionId)}
+                >
+                  Q. {question.content} ({typeMapping[question.type]})
+                  <span style={styles.questionAfter}></span>
+                </p>
+                {/* Note */}
+                <span style={styles.note}>
+                  *질문을 클릭하면 자세한 분석 내용을 볼 수 있어요!
+                </span>
+              </div>
+              {/* Answers */}
               <ul style={styles.answerList}>
-                {item.answers.map((answer, index) => (
-                  <li
-                    key={index}
-                    style={styles.answer}
-                  >
-                    A. {answer}
+                {answers[question.questionId]?.map((answer, index) => (
+                  <li key={index} style={styles.answer}>
+                    <div style={styles.answerBubble}>A. {answer}</div>
                     <span style={styles.answerAfter}></span>
                   </li>
                 ))}
@@ -158,25 +144,23 @@ const DetailedContent = () => {
         </ul>
       </div>
 
-      {/* 우측 분석 내용 영역 */}
+      {/* Analysis Pane */}
       {selectedQuestion && (
         <div style={styles.rightPane}>
-          <div style={styles.analysisContainer}>
-            <h3 style={styles.analysisTitle}>
-              {analysisData[selectedQuestion].question}
-            </h3>
-            <p style={styles.analysisText}>
-              {analysisData[selectedQuestion].analysis}
-            </p>
-            <h4 style={styles.pointTitle}>요약 내용</h4>
-            <ul style={styles.pointList}>
-              {analysisData[selectedQuestion].point.map((point, index) => (
-                <li key={index} style={styles.pointItem}>
-                  {point}
-                </li>
-              ))}
-            </ul>
-          </div>
+          <h3 style={styles.analysisTitle}>
+            {analysisData[selectedQuestion]?.question}
+          </h3>
+          <p style={styles.analysisText}>
+            {analysisData[selectedQuestion]?.analysis}
+          </p>
+          <h4 style={styles.pointTitle}>주요 포인트</h4>
+          <ul style={styles.pointList}>
+            {analysisData[selectedQuestion]?.point.map((point, index) => (
+              <li key={index} style={styles.pointItem}>
+                {point}
+              </li>
+            ))}
+          </ul>
         </div>
       )}
     </div>
@@ -255,6 +239,11 @@ const styles = {
     borderRightColor: "#000", // 말풍선 꼬리 색상
     borderLeft: "0",
     marginTop: "-5px",
+  },
+  note: {
+    fontSize: '14px',
+    color: '#888',
+    marginLeft: '10px',
   },
   answerList: {
     marginTop: "10px",
