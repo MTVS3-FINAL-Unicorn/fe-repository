@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { getQuestionsByMeetingId, getReportsByQuestionId } from '../utils/api';
 import WordCloud from '../components/WordCloud';
 import TopicAnalysis from '../components/TopicAnalysis';
-import SentimentAnalysis from '../components/SentimentAnalysis';
+import EachSentimentAnalysis from '../components/EachSentimentAnalysis';
 
 const typeMapping = {
   VOICE: '음성형',
@@ -192,7 +192,7 @@ const DetailedContent = () => {
                 try {
                   const parsedData = JSON.parse(report.analysisResult);
                   return (
-                    <SentimentAnalysis
+                    <EachSentimentAnalysis
                       key={report.reportId}
                       sentimentData={parsedData}
                     />
