@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { getQuestionsByMeetingId, getReportsByQuestionId, getPreferenceAnswers } from '../utils/api';
 import { Bar } from 'react-chartjs-2';
-import WordCloud from '../components/WordCloud';
+import EachWordCloud from '../components/EachWordCloud';
 import EachTopicAnalysis from '../components/EachTopicAnalysis';
 import EmbeddingVisualization from '../components/EmbeddingVisualization';
 import EachSentimentAnalysis from '../components/EachSentimentAnalysis';
@@ -174,19 +174,21 @@ const DetailedContent = () => {
   };
 
   return (
-    <div style={styles.container}>
-      <div style={styles.leftPane}>
+    <div style={selectedQuestion ? styles.containerExpanded : styles.containerCollapsed}>
+      <div style={selectedQuestion ? styles.leftPaneExpanded : styles.leftPaneCollapsed} >
         <h2 style={styles.title}>좌담회 스크립트</h2>
         <ul style={styles.questionList}>
           {questions.map((question) => (
             <li key={question.questionId} style={styles.questionItem}>
               <div style={styles.questionContainer}>
-                {/* Question */}
+              {/* Question */}
                 <p
                   style={styles.question}
                   onClick={() => handleQuestionClick(question.questionId, question.type)}
                 >
-                  Q. {question.content} ({typeMapping[question.type]})
+                  <span>Q. {question.content}</span>
+                  <br />
+                  <span>({typeMapping[question.type]})</span>
                   <span style={styles.questionAfter}></span>
                 </p>
                 {/* Note */}
@@ -230,13 +232,16 @@ const DetailedContent = () => {
             ) : (
               reports.map((report) => {
                 switch (report.analysisType) {
-                  // case 'wordcloud':
-                  //   return (
-                  //     <WordCloud
-                  //       key={report.reportId}
-                  //       imageSrc={report.analysisResult}
-                  //     />
-                  //   );
+                  case 'wordcloud':
+                    try {
+                      const parsedData = JSON.parse(report.analysisResult);
+                      return (
+                        <EachWordCloud key={report.reportId} data={parsedData} />
+                      );
+                    } catch (error) {
+                      console.error('Failed to parse wordcloud analysis:', error);
+                    }
+                    break;
                   case 'topicAnalysis':
                     try {
                       const parsedData = JSON.parse(report.analysisResult);
@@ -283,6 +288,12 @@ const styles = {
     display: "flex",
     backgroundColor: "#f9f9f9",
   },
+    containerCollapsed: {
+      display: 'flex',
+  },
+  containerExpanded: {
+    display: 'flex',
+  },
   leftPaneCollapsed: {
     width: "97%",
     padding: "20px",
@@ -326,19 +337,21 @@ const styles = {
     transition: "background-color 0.3s",
   },
   question: {
-    backgroundColor: "#000",
-    color: "#fff",
-    padding: "15px",
-    borderRadius: "10px",
-    marginBottom: "10px",
-    fontSize: "18px",
-    fontWeight: "bold",
-    position: "relative",
-    width: "fit-content",
-    maxWidth: "80%",
-    textAlign: "left",
-    marginLeft: "0",
-    marginRight: "auto",
+    backgroundColor: '#000',
+    color: '#fff',
+    padding: '15px',
+    borderRadius: '10px',
+    marginBottom: '10px',
+    fontSize: '18px',
+    fontWeight: 'bold',
+    position: 'relative',
+    width: 'fit-content',
+    maxWidth: '80%',
+    textAlign: 'left',
+    marginLeft: '0',
+    marginRight: 'auto',
+    lineHeight: '1.6', // 줄 간격 설정
+    whiteSpace: 'normal', // 텍스트 줄바꿈 허용
   },
   questionAfter: {
     content: "''",
