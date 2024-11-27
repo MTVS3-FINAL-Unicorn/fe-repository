@@ -1,25 +1,29 @@
 import React from 'react';
 
-const EmbeddingVisualization = ({ tensorBoardUrl }) => (
-  <section style={styles.container}>
-    <h2>TensorBoard 임베딩 시각화</h2>
-    <iframe
-      src={tensorBoardUrl}
-      width="100%"
-      height="500px"
-      title="TensorBoard Embedding Visualization"
-      style={{ border: '1px solid #ddd', borderRadius: '8px' }}
-    />
-    <p>임베딩 시각화 결과입니다. 이곳에서 답변의 유사도를 더 자세히 탐색할 수 있습니다.</p>
-  </section>
-);
+const EmbeddingVisualization = ({ embeddingData }) => {
+  if (!embeddingData) {
+    return <p>데이터가 없습니다.</p>;
+  }
 
-const styles = {
-  container: {
-    padding: '20px',
-    lineHeight: 1.6,
-    textAlign: 'center'
-  },
-}
+  return (
+    <div style={{ margin: "20px auto", textAlign: "center" }}>
+      <h3 style={{ marginBottom: "10px", fontSize: "28px" }}>임베딩 분석</h3>
+      <p style={{ marginBottom: "20px", fontSize: "16px", color: "#555" }}>
+        임베딩 분석은 데이터의 다차원 공간을 시각화하여, 항목 간의 유사성과 관계를 쉽게 이해할 수 있도록 돕습니다. <br/>
+        아래 시각화는 고차원 데이터를 2D 또는 3D로 투영하여 항목 간의 구조적 관계를 보여줍니다.
+      </p>
+      <iframe
+        src={embeddingData}
+        title="Embedding Visualization"
+        style={{
+          width: "1200px",
+          height: "800px",
+          border: "1px solid #ddd",
+          borderRadius: "10px",
+        }}
+      />
+    </div>
+  );
+};
 
 export default EmbeddingVisualization;

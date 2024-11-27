@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useState } from "react";
 import * as d3 from "d3";
 
 const TopicAnalysis = ({ data }) => {
-  console.log(data);
   const [selectedTopic, setSelectedTopic] = useState(0); // 기본 선택 토픽
   const [lambda, setLambda] = useState(1);
   const svgRef = useRef();
