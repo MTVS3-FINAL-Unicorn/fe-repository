@@ -4,7 +4,7 @@ import * as d3 from "d3";
 const TopicAnalysis = ({ data }) => {
   console.log(data);
   const [selectedTopic, setSelectedTopic] = useState(0); // 기본 선택 토픽
-  const [lambda, setLambda] = useState(1); // 관련성 조정 슬라이더 값
+  const [lambda, setLambda] = useState(1);
   const svgRef = useRef();
   const barChartRef = useRef();
 
@@ -139,27 +139,32 @@ const TopicAnalysis = ({ data }) => {
       return;
     }
 
+    // λ에 따라 빈도 재계산
     const terms = data.tinfo.Term.filter((_, i) => data.tinfo.Category[i] === `Topic${selectedTopic + 1}`);
     const frequencies = terms.map((term, i) => ({
       term,
-      freq: data.tinfo.Freq[i] * lambda,
+      freq: data.tinfo.Freq[i] * lambda, // λ에 따라 빈도 조정
     }));
 
+    // 빈도 내림차순으로 정렬 및 상위 10개 추출
     frequencies.sort((a, b) => b.freq - a.freq);
     const topTerms = frequencies.slice(0, 10);
 
+    // 막대 그래프 생성
     const barChart = d3.select(barChartRef.current);
-    barChart.selectAll("*").remove();
+    barChart.selectAll("*").remove(); // 기존 막대 그래프 초기화
 
     const width = 400;
     const height = 360;
     const margin = { top: 20, right: 20, bottom: 40, left: 120 };
 
+    // X축 및 Y축 스케일 설정
     const xScale = d3.scaleLinear().domain([0, d3.max(topTerms, (d) => d.freq)]).range([0, width - margin.left - margin.right]);
     const yScale = d3.scaleBand().domain(topTerms.map((d) => d.term)).range([0, height - margin.top - margin.bottom]).padding(0.1);
 
     const g = barChart.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
 
+    // 막대 생성
     g.selectAll("rect")
       .data(topTerms)
       .enter()
@@ -170,6 +175,7 @@ const TopicAnalysis = ({ data }) => {
       .attr("height", yScale.bandwidth())
       .attr("fill", "#A5D8FF");
 
+    // 막대 끝 빈도 수 표시
     g.selectAll("text")
       .data(topTerms)
       .enter()
@@ -181,9 +187,14 @@ const TopicAnalysis = ({ data }) => {
       .style("font-family", "Paperlogy")
       .text((d) => d.freq.toFixed(2));
 
+    // Y축 표시
     g.append("g").call(d3.axisLeft(yScale).tickSize(0).tickPadding(10).tickSizeOuter(0));
-    g.append("g").attr("transform", `translate(0,${height - margin.top - margin.bottom})`).call(d3.axisBottom(xScale).ticks(5));
-  }, [data, selectedTopic, lambda]);
+
+    // X축 표시
+    g.append("g")
+      .attr("transform", `translate(0,${height - margin.top - margin.bottom})`)
+      .call(d3.axisBottom(xScale).ticks(5));
+  }, [data, selectedTopic, lambda]); // λ 변경 시마다 실행
 
   return (
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", margin: "20px" }}>
@@ -200,7 +211,7 @@ const TopicAnalysis = ({ data }) => {
             각 원의 크기는 빈도를 나타냅니다.
           </p>
         </div>
-        <div style={{ textAlign: "center" }}>
+        <div style={{ textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center" }}>
           <svg ref={barChartRef} width={450} height={360}></svg>
           <p style={{ fontFamily: "Paperlogy", fontSize: "14px", marginTop: "10px" }}>
             이 차트는 선택된 토픽에서 가장 많이 언급된 단어와 빈도를 나타냅니다.
@@ -212,8 +223,25 @@ const TopicAnalysis = ({ data }) => {
             step={0.1}
             value={lambda}
             onChange={(e) => setLambda(Number(e.target.value))}
+            style={{ marginTop: "20px" }}
           />
-          <span> 관련성 척도 = {lambda.toFixed(1)}</span>
+          <span style={{ fontFamily: "Paperlogy", fontSize: "14px", marginTop: "5px" }}>
+            관련성 척도 = {lambda.toFixed(1)}
+          </span>
+          <p
+            style={{
+              fontFamily: "Paperlogy",
+              fontSize: "14px",
+              marginTop: "10px",
+              color: "#555",
+              width: "300px",
+              textAlign: "center",
+            }}
+          >
+            관련성 척도는 단어가 토픽을 얼마나 잘 대표하는지를 <br/>
+            조정하는 슬라이더입니다. 낮은 값은 특화된 단어를, <br/>
+            높은 값은 자주 등장하는 단어를 강조합니다.
+          </p>
         </div>
       </div>
       <div style={{ marginTop: "40px", textAlign: "center" }}>
