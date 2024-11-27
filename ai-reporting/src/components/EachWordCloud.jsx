@@ -54,11 +54,11 @@ const EachWordCloud = ({ data }) => {
                     '4px 4px 6px rgba(0, 0, 0, 0.1), -4px -4px 6px rgba(255, 255, 255, 0.7)';
                 }}
             >
-                <h4 style={{ margin: '10px 0', color: '#444', fontSize: '18px', fontWeight: '600' }}>
+                <h4 style={{ margin: '10px 0', color: '#7967cb', fontSize: '20px', fontWeight: '600' }}>
                 {word}
                 </h4>
-                <p style={{ margin: '10px 0', fontSize: '20px', fontWeight: '700', color: '#007BFF' }}>
-                {count}
+                <p style={{ margin: '10px 0', fontSize: '16px', fontWeight: '700', color: '#444' }}>
+                빈도수: {count}
                 </p>
             </div>
             ))}
@@ -68,8 +68,8 @@ const EachWordCloud = ({ data }) => {
         <p
             style={{
             marginTop: '20px',
-            fontSize: '14px',
-            color: '#888',
+            fontSize: '16px',
+            color: '#000',
             fontStyle: 'italic',
             textAlign: 'center',
             }}

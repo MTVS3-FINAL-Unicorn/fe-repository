@@ -45,7 +45,13 @@ const ResultsPage = ({ meetingId = 1 }) => {
   return (
     <div className="page-container">
       <header className="header">
-        <h1 className="company-name">Burden</h1>
+        <div className="logo-container">
+          <img
+            className="logo"
+            src="https://bucat.s3.ap-northeast-2.amazonaws.com/common/Unicorn_Text.png"
+            alt="Burden Logo"
+          />
+        </div>
         <nav className="nav-bar">
           <div
             className={`nav-item ${selectedTab === 'Overall' ? 'active' : ''}`}

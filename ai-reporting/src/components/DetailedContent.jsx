@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { getQuestionsByMeetingId, getReportsByQuestionId, getPreferenceAnswers } from '../utils/api';
-import { Bar } from 'react-chartjs-2';
 import EachWordCloud from '../components/EachWordCloud';
 import EachTopicAnalysis from '../components/EachTopicAnalysis';
 import EmbeddingVisualization from '../components/EmbeddingVisualization';
@@ -58,64 +57,30 @@ const DetailedContent = () => {
     }
   };
 
-  const analyzePreferenceAnswers = () => {
-    const counts = {};
-    preferenceAnswers.forEach((answer) => {
-      if (counts[answer.content]) {
-        counts[answer.content]++;
-      } else {
-        counts[answer.content] = 1;
-      }
-    });
-
-    return {
-      labels: Object.keys(counts),
-      datasets: [
-        {
-          label: '응답 개수',
-          data: Object.values(counts),
-          backgroundColor: 'rgba(75, 192, 192, 0.6)',
-          borderColor: 'rgba(75, 192, 192, 1)',
-          borderWidth: 1,
-        },
-      ],
-    };
-  };
-
-  const preferenceChartOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        position: 'top',
-      },
-    },
-  };
-
   // 질문과 답변 데이터
   const answers = {
     1: [
-      '버든 백은 심플한 디자인 덕분에 어떤 옷에도 잘 어울립니다. 또 가벼우면서도 내구성이 뛰어나 외출할 때 항상 들고 나가요.',
-      '학생으로서 많은 짐을 들고 다니는데, 버든 백은 크기가 적당하고 튼튼해서 정말 좋아요. 특히, 원단이 업사이클링 소재라는 점이 멋있습니다.',
+      '버든백은 심플한 디자인 덕분에 어떤 옷에도 잘 어울립니다. 또 가벼우면서도 내구성이 뛰어나 외출할 때 항상 들고 나가요.',
+      '학생으로서 많은 짐을 들고 다니는데, 버든백은 크기가 적당하고 튼튼해서 정말 좋아요. 특히, 원단이 업사이클링 소재라는 점이 멋있습니다.',
       '아이들과 공원에 갈 때 물, 간식, 옷가지를 넣어도 공간이 넉넉해서 만족스러웠습니다. 무엇보다도 세탁하기 쉬운 소재라는 점이 정말 편리했어요.',
       '가방 하나로 스타일링을 완성할 수 있어 자주 사용합니다. 또한, 환경을 생각하는 브랜드라는 점에서 구매에 대한 자부심을 느껴요.',
-      '버든 백은 비 오는 날에도 내용물이 젖지 않아 좋았어요. 원단 자체가 방수 기능이 있어 가방 안의 책과 물건을 안전하게 지켜줍니다.',
+      '버든백은 비 오는 날에도 내용물이 젖지 않아 좋았어요. 원단 자체가 방수 기능이 있어 가방 안의 책과 물건을 안전하게 지켜줍니다.',
       '매일 노트북을 넣고 출퇴근을 하는데, 스트랩이 튼튼하고 어깨에 무리가 가지 않아서 좋습니다.',
-      '버든 백은 튼튼한 소재 덕분에 짐이 많아도 형태가 잘 유지됩니다. 어떤 자리에서도 과하지 않고 세련돼 보입니다.',
+      '버든백은 튼튼한 소재 덕분에 짐이 많아도 형태가 잘 유지됩니다. 어떤 자리에서도 과하지 않고 세련돼 보입니다.',
       '마트에서 장 본 물건들을 담아도 무겁지 않게 들고 다닐 수 있었습니다. 튼튼한 손잡이가 특히 마음에 들어요.',
     ],
     2: [
       '색상 옵션이 더 다양해졌으면 좋겠어요. 지금의 미니멀한 디자인은 좋지만, 더 밝고 산뜻한 색상도 있었으면 합니다.',
       '가방 내부에 더 많은 수납 공간이나 작은 포켓이 추가되면 좋을 것 같아요. 노트북 외에 작은 물건을 정리하기가 조금 아쉬웠습니다.',
-      '아이들과 함께 사용할 수 있는 더 큰 크기의 버든 백이 출시된다면 좋겠습니다.',
-      '버든 백의 소재에 대한 상세한 설명이 라벨이나 태그에 추가되면 좋겠어요. 업사이클링 과정에 대해 더 알고 싶습니다.',
+      '아이들과 함께 사용할 수 있는 더 큰 크기의 버든백이 출시된다면 좋겠습니다.',
+      '버든백의 소재에 대한 상세한 설명이 라벨이나 태그에 추가되면 좋겠어요. 업사이클링 과정에 대해 더 알고 싶습니다.',
       '스트랩 길이를 조절할 수 있는 기능이 있다면 더 많은 사람들이 편리하게 사용할 수 있을 것 같아요.',
       '내부에 방수 처리된 포켓이 추가되면 좋겠습니다. 텀블러나 물병을 넣을 때 유용할 것 같아요.',
       '가방 외부에 작은 포켓이 있다면 지갑이나 열쇠 같은 자주 사용하는 물건을 쉽게 꺼낼 수 있을 것 같습니다.',
       '가방 하단에 더 단단한 보강이 있으면 장을 볼 때 더 안정감 있게 사용할 수 있을 것 같아요.',
     ],
     4: [
-      '버든 백 제작 과정을 소개하는 영상.',
+      '버든백 제작 과정을 소개하는 영상.',
       '내구성 테스트 및 인증 자료.',
       '가족을 위한 활용 팁.',
       '환경 보호와 관련된 캠페인 기록.',
@@ -138,40 +103,49 @@ const DetailedContent = () => {
 
   // 분석 데이터
   const analysisData = {
-    1: {
-      question: '버든 백을 사용하며 느낀 가장 큰 장점은?',
-      analysis: '사용자들이 심플한 디자인과 내구성을 선호하는 것으로 분석됩니다.',
-          point: ['심플한 디자인과 내구성 덕분에 어떤 옷에도 잘 어울리며, 외출 시 항상 사용하기 좋은 가방입니다.',
-              '업사이클링 소재로 제작되어 환경을 생각하는 브랜드 가치와 가벼움, 내구성을 동시에 제공합니다.',
-              '수납공간과 방수 기능이 뛰어나 실용적이고 다양한 상황에서 편리하게 사용할 수 있습니다.',
-            ],
-    },
-    2: {
-      question: '버든 백의 개선 방향은 무엇일까요?',
-      analysis: '수납 공간 부족과 스트랩 길이 조정 문제를 개선해야 한다는 의견이 다수입니다.',
-      point: ['수납 공간', '스트랩 길이 조정', '사용 편리성'],
-      },
-    3: {
-      question: '버든 백을 사용하며 느낀 가장 큰 장점은?',
-      analysis: '사용자들이 심플한 디자인과 내구성을 선호하는 것으로 분석됩니다.',
-      point: ['심플한 디자인', '내구성', '다용도'],
-    },
-    4: {
-      question: '버든 백의 개선 방향은 무엇일까요?',
-      analysis: '수납 공간 부족과 스트랩 길이 조정 문제를 개선해야 한다는 의견이 다수입니다.',
-      point: ['수납 공간', '스트랩 길이 조정', '사용 편리성'],
-      },
-    5: {
-      question: '버든 백을 사용하며 느낀 가장 큰 장점은?',
-      analysis: '사용자들이 심플한 디자인과 내구성을 선호하는 것으로 분석됩니다.',
-      point: ['심플한 디자인', '내구성', '다용도'],
-    },
-    6: {
-      question: '버든 백의 개선 방향은 무엇일까요?',
-      analysis: '수납 공간 부족과 스트랩 길이 조정 문제를 개선해야 한다는 의견이 다수입니다.',
-      point: ['수납 공간', '스트랩 길이 조정', '사용 편리성'],
-    },
-  };
+  1: {
+    title: "버든백 사용 경험",
+    analysis: "버든백은 가벼움, 내구성, 실용성, 환경 의식을 주요 장점으로 인식되고 있습니다.",
+    points: [
+      "가벼우면서도 튼튼하고 다양한 스타일에 어울립니다.",
+      "넉넉한 공간과 세탁 용이성, 방수 기능이 실용적입니다.",
+      "업사이클링 소재 사용으로 환경 보호에 기여하는 느낌을 줍니다.",
+      "세련되고 트렌디한 디자인으로 긍정적인 소비자 인식을 형성합니다.",
+    ],
+    keywords: ["가벼움", "내구성", "환경 보호", "디자인"],
+  },
+  2: {
+    title: "개선 방향",
+    analysis: "더 다양한 색상, 수납 공간, 기능적 개선, 크기 선택권이 필요합니다.",
+    points: [
+      "더 다양한 색상 옵션 제공 필요.",
+      "수납 공간 부족 문제 해결.",
+      "스트랩 조절 및 방수 포켓 추가.",
+      "다양한 크기와 디자인적 다양성 제공.",
+    ],
+    keywords: ["색상", "수납", "기능성", "사이즈"],
+  },
+  4: {
+    title: "브랜드 정보 요구",
+    analysis: "브랜드 신뢰성을 높이기 위해 제작 과정, 내구성 정보, 사용자 가이드 제공이 요구됩니다.",
+    points: [
+      "제작 과정과 내구성 관련 정보 요청.",
+      "고객 리뷰와 환경 캠페인 기록 공유 필요.",
+      "다양한 활용 방법 및 관리 방법 안내.",
+    ],
+    keywords: ["제작 과정", "내구성", "활용 방법"],
+  },
+  6: {
+    title: "브랜드 메시지",
+    analysis: "브랜드 메시지를 통해 지속 가능성과 소비자의 사회적 책임을 강조할 필요가 있습니다.",
+    points: [
+      "환경에 긍정적 영향을 미칠 수 있다는 메시지 전달.",
+      "친환경 소비가 일상에서도 실현 가능하다는 점 강조.",
+      "환경 문제 해결을 위한 소비자의 역할 인식.",
+    ],
+    keywords: ["지속 가능성", "실용성", "사회적 책임"],
+  },
+};
 
   return (
     <div style={selectedQuestion ? styles.containerExpanded : styles.containerCollapsed}>
@@ -213,14 +187,33 @@ const DetailedContent = () => {
       {/* Analysis Pane */}
       {selectedQuestion && (
         <div style={styles.rightPane}>
-          <h3 style={styles.analysisTitle}>
-            {selectedQuestion &&
-              `Q. ${
-                questions.find((q) => q.questionId === selectedQuestion)?.content
-              } (${
-                typeMapping[questions.find((q) => q.questionId === selectedQuestion)?.type]
-              })`}
-          </h3>
+          {/* Analysis Data Section */}
+          <h2 style={styles.analysisHeader}>분석 내용</h2>
+          <div style={styles.analysisContainer}>
+            <h3 style={styles.analysisTitle}>
+              주제: {analysisData[selectedQuestion]?.title}
+            </h3>
+            <p style={styles.analysisText}>
+              한줄 요약: {analysisData[selectedQuestion]?.analysis}
+            </p>
+            <div style={styles.section}>
+              <h4 style={styles.pointTitle}>주요 내용</h4>
+              <ul style={styles.pointList}>
+                {analysisData[selectedQuestion]?.points.map((point, index) => (
+                  <li key={index} style={styles.pointItem}>
+                    {point}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div style={styles.section}>
+              <h4 style={styles.pointTitle}>키워드</h4>
+              <p style={styles.keywordText}>
+                {analysisData[selectedQuestion]?.keywords.join(', ')}
+              </p>
+            </div>
+          </div>
+          {/* Chart or Reports */}
           <div style={styles.analysisContent}>
             {preferenceAnswers ? (
               <div>
@@ -284,12 +277,12 @@ const DetailedContent = () => {
 
 // 스타일 정의
 const styles = {
-   container: {
+  container: {
     display: "flex",
     backgroundColor: "#f9f9f9",
   },
-    containerCollapsed: {
-      display: 'flex',
+  containerCollapsed: {
+    display: 'flex',
   },
   containerExpanded: {
     display: 'flex',
@@ -310,14 +303,15 @@ const styles = {
   rightPane: {
     width: "70%",
     margin: "0 20px",
+    padding: "0px 40px",
     backgroundColor: "#ffffff",
     height: "80vh", // 뷰포트 높이에 맞춤
     overflowY: "auto", // 스크롤 가능
     alignSelf: "flex-start",
     position: "sticky", // 플로팅 효과를 위해 sticky 사용
-    top: "20px", // 뷰포트 상단에서의 고정 위치
+    top: "0px", // 뷰포트 상단에서의 고정 위치
   },
-   title: {
+  title: {
     textAlign: "center",
     fontSize: "24px",
     fontWeight: "bold",
@@ -403,44 +397,56 @@ const styles = {
   },
   analysisContainer: {
     padding: "20px",
-    backgroundColor: "#f9f9f9",
-    borderRadius: "8px",
-    boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+    backgroundColor: "#ffffff",
+    borderRadius: "10px",
+    margin: "20px auto",
+    width: "60%",
+  },
+  analysisHeader: { 
+    borderBottom: "1px solid #ddd",
+    textAlign: "center",
+    fontSize: "28px",
+    paddingBottom: "20px",
   },
   analysisTitle: {
-    fontSize: "18px",
+    fontSize: "20px",
     fontWeight: "bold",
-    marginBottom: "10px",
-    backgroundColor: "#000", // 검정 배경
-    color: "#fff",           // 흰색 글씨
-    padding: "20px 10px",         // 패딩 추가
-    textAlign: "center",     // 텍스트 중앙 정렬
+    color: "#333",
+    marginBottom: "5px",
+    paddingBottom: "5px",
   },
   analysisText: {
     fontSize: "16px",
+    color: "#555",
+    lineHeight: "1.8",
+    marginBottom: "20px",
+    marginTop: "5px",
+  },
+  section: {
     marginBottom: "20px",
   },
-  analysisContent: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '20px',
-  },
   pointTitle: {
-    fontSize: "16px",
+    fontSize: "18px",
     fontWeight: "bold",
+    color: "#333",
     marginBottom: "10px",
   },
   pointList: {
-    listStyleType: "none",
+    listStyleType: "disc",
+    marginLeft: "20px",
     padding: "0",
-    margin: "0",
   },
   pointItem: {
-    backgroundColor: "#ffffff",
-    padding: "10px",
+    fontSize: "16px",
+    color: "#555",
     marginBottom: "10px",
-    borderRadius: "4px",
-    boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
+    lineHeight: "1.6",
+  },
+  keywordText: {
+    fontSize: "16px",
+    color: "#333",
+    lineHeight: "1.8",
+    marginTop: "10px",
   },
 };
 
