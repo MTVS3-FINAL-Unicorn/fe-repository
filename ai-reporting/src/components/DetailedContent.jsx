@@ -260,7 +260,7 @@ const DetailedContent = () => {
                       return (
                         <EmbeddingVisualization
                           key={report.reportId}
-                          tensorBoardUrl={report.analysisResult}
+                          embeddingData={report.analysisResult}
                         />
                       );
                   default:

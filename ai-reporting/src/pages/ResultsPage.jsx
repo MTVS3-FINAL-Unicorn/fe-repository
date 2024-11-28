@@ -83,7 +83,6 @@ const OverallAnalysis = ({ reports }) => {
   const topicData = reports.find((report) => report.analysisType === 'topicAnalysis');
   const sentimentData = reports.find((report) => report.analysisType === 'sentimentAnalysis');
   const embeddingData = reports.find((report) => report.analysisType === 'embeddingAnalysis');
-  console.log(embeddingData)
 
   const parseJSONSafe = (jsonString) => {
     try {
