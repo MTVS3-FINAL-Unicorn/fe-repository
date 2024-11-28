@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { getQuestionsByMeetingId, getReportsByQuestionId, getPreferenceAnswers } from '../utils/api';
 import EachWordCloud from '../components/EachWordCloud';
 import EachTopicAnalysis from '../components/EachTopicAnalysis';
-import EmbeddingVisualization from '../components/EmbeddingVisualization';
+import EachEmbeddingVisualization from '../components/EachEmbeddingVisualization';
 import EachSentimentAnalysis from '../components/EachSentimentAnalysis';
 import PreferenceChart from '../components/PreferenceChart';
 
@@ -258,7 +258,7 @@ const DetailedContent = () => {
                     break;
                   case 'embeddingAnalysis':
                       return (
-                        <EmbeddingVisualization
+                        <EachEmbeddingVisualization
                           key={report.reportId}
                           embeddingData={report.analysisResult}
                         />
