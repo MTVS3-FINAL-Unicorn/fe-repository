@@ -16,7 +16,7 @@ const EachEmbeddingVisualization = ({ embeddingData }) => {
         src={embeddingData}
         title="Each Embedding Visualization"
         style={{
-          width: "1200px",
+          width: "1000px",
           height: "800px",
           border: "1px solid #ddd",
           borderRadius: "10px",
