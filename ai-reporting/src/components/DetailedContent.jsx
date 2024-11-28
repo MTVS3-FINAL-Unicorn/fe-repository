@@ -256,13 +256,13 @@ const DetailedContent = () => {
                       console.error('Failed to parse sentiment analysis:', error);
                     }
                     break;
-                  // case 'embeddingAnalysis':
-                  //     return (
-                  //       <EmbeddingVisualization
-                  //         key={report.reportId}
-                  //         tensorBoardUrl={report.analysisResult}
-                  //       />
-                  //     );
+                  case 'embeddingAnalysis':
+                      return (
+                        <EmbeddingVisualization
+                          key={report.reportId}
+                          tensorBoardUrl={report.analysisResult}
+                        />
+                      );
                   default:
                     return null;
                 }
