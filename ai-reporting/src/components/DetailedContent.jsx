@@ -19,16 +19,28 @@ const DetailedContent = () => {
   const [preferenceAnswers, setPreferenceAnswers] = useState(null);
 
   useEffect(() => {
-    const fetchQuestions = async () => {
-      const meetingId = 1;
+    const fetchInitialData = async () => {
       try {
-        const data = await getQuestionsByMeetingId(meetingId);
-        setQuestions(data);
+        const meetingId = 1;
+
+        // 질문 가져오기
+        const questionsData = await getQuestionsByMeetingId(meetingId);
+        setQuestions(questionsData);
+
+        // 텐서보드 데이터 가져오기
+        const embeddingReport = await getReportsByQuestionId(meetingId);
+        const embeddingAnalysis = embeddingReport.find(
+          (report) => report.analysisType === 'embeddingAnalysis'
+        );
+        if (embeddingAnalysis) {
+          setEmbeddingData(embeddingAnalysis.analysisResult); // 텐서보드 URL 설정
+        }
       } catch (error) {
-        console.error('Failed to fetch questions:', error);
+        console.error('Failed to fetch initial data:', error);
       }
     };
-    fetchQuestions();
+
+    fetchInitialData();
   }, []);
 
   const handleQuestionClick = async (id, type) => {

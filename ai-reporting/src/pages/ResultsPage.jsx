@@ -11,22 +11,37 @@ const ResultsPage = ({ meetingId = 1 }) => {
   const [questions, setQuestions] = useState([]);
   const [selectedTab, setSelectedTab] = useState('Overall');
   const [reports, setReports] = useState([]);
+  const [embeddingData, setEmbeddingData] = useState(null); // 임베딩 데이터 상태 추가
 
+  // 질문 데이터 가져오기
   useEffect(() => {
     const fetchQuestions = async () => {
-      const data = await getQuestionsByMeetingId(meetingId);
-      setQuestions(data);
+      try {
+        const data = await getQuestionsByMeetingId(meetingId);
+        setQuestions(data);
+      } catch (error) {
+        console.error('Error fetching questions:', error);
+      }
     };
 
     fetchQuestions();
   }, [meetingId]);
 
+  // 선택된 탭에 따라 보고서 데이터 가져오기
   useEffect(() => {
     const fetchReports = async () => {
       try {
         if (selectedTab === 'Overall') {
           const data = await getReportsByMeetingId(meetingId);
           setReports(data);
+
+          // Overall 탭에서는 임베딩 데이터 가져오기
+          const embeddingReport = data.find(
+            (report) => report.analysisType === 'embeddingAnalysis'
+          );
+          if (embeddingReport) {
+            setEmbeddingData(embeddingReport.analysisResult); // 임베딩 데이터 설정
+          }
         } else {
           const selectedQuestion = questions.find((q) => q.content === selectedTab);
           if (selectedQuestion) {
@@ -69,7 +84,7 @@ const ResultsPage = ({ meetingId = 1 }) => {
       </header>
       <div className="content">
         {selectedTab === 'Overall' ? (
-          <OverallAnalysis reports={reports} />
+          <OverallAnalysis reports={reports} embeddingData={embeddingData} />
         ) : (
           <DetailedContent />
         )}
@@ -78,11 +93,10 @@ const ResultsPage = ({ meetingId = 1 }) => {
   );
 };
 
-const OverallAnalysis = ({ reports }) => {
+const OverallAnalysis = ({ reports, embeddingData }) => {
   const wordcloudData = reports.find((report) => report.analysisType === 'wordcloud');
   const topicData = reports.find((report) => report.analysisType === 'topicAnalysis');
   const sentimentData = reports.find((report) => report.analysisType === 'sentimentAnalysis');
-  const embeddingData = reports.find((report) => report.analysisType === 'embeddingAnalysis');
 
   const parseJSONSafe = (jsonString) => {
     try {
@@ -102,9 +116,7 @@ const OverallAnalysis = ({ reports }) => {
       {sentimentData && (
         <SentimentAnalysis sentimentData={parseJSONSafe(sentimentData.analysisResult)} />
       )}
-      {embeddingData && (
-        <EmbeddingVisualization embeddingData={embeddingData.analysisResult} />
-      )}
+      {embeddingData && <EmbeddingVisualization embeddingData={embeddingData} />}
     </div>
   );
 };
